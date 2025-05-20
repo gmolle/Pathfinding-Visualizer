@@ -179,13 +179,17 @@ export const usePathfinding = () => {
     // Reset grid for animation
     setGrid(
       grid.map((row) =>
-        row.map((node) => ({
-          ...node,
-          isVisited: false,
-          isPath: false,
-          isCurrent: false,
-          animationKey: 0,
-        }))
+        row.map((node) => {
+          if (node.isWall) return node; // Leave walls unchanged
+
+          return {
+            ...node,
+            isVisited: false,
+            isPath: false,
+            isCurrent: false,
+            animationKey: 0,
+          };
+        })
       )
     );
 

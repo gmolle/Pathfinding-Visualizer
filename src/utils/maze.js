@@ -169,9 +169,6 @@ export const generateMaze = async (skew, grid, setGrid, bfs) => {
   }
 
   async function recursiveDivide(rowStart, rowEnd, colStart, colEnd) {
-    console.log(
-      `recursiveDivide: rowStart=${rowStart}, rowEnd=${rowEnd}, colStart=${colStart}, colEnd=${colEnd}`
-    );
     const width = colEnd - colStart + 1;
     const height = rowEnd - rowStart + 1;
 
