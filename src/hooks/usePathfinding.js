@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { runAlgorithm, bfs } from "../utils/algorithms";
-import { generateMaze } from "../utils/maze";
+import { generateMaze, generateRandomScatter } from "../utils/maze";
 
 const ROWS = 31;
 const COLS = 51;
@@ -254,10 +254,14 @@ export const usePathfinding = () => {
   };
 
   // Generate maze
-  const generatePathfindingMaze = async (skew) => {
+  const generatePathfindingMaze = async (mazeType) => {
     if (isRunning) return;
     setIsRunning(true);
-    await generateMaze(skew, grid, setGrid, bfs);
+    if (mazeType === "random-scatter") {
+      await generateRandomScatter(grid, setGrid, bfs);
+    } else {
+      await generateMaze(mazeType, grid, setGrid, bfs);
+    }
     setIsRunning(false);
   };
 

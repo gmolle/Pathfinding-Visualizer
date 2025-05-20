@@ -100,6 +100,9 @@ export default function Controls({
         <option value="vertical" className="bg-gray-700 text-white">
           Vertical Skew
         </option>
+        <option value="random-scatter" className="bg-gray-700 text-white">
+          Random Scatter
+        </option>
       </select>
       <button
         className={`px-4 py-2 font-semibold rounded-lg transition-colors text-white  ${
