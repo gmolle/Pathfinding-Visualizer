@@ -38,20 +38,26 @@ export const usePathfinding = () => {
   const [mode, setMode] = useState(null); // null (walls), "weight", "eraser"
   const [prevMode, setPrevMode] = useState(null);
   const [algorithm, setAlgorithm] = useState("dijkstra");
-  const [speed, setSpeed] = useState(30); // Increased for pulse visibility
+  const [speed, setSpeed] = useState(100); // For pulse visibility
   const [mazeType, setMazeType] = useState("");
   const [dragging, setDragging] = useState(null); // null, "start", "end"
+  const [isRunning, setIsRunning] = useState(false); // Track running state
 
   // Reset grid
-  const resetGrid = () => setGrid(createGrid());
+  const resetGrid = () => {
+    if (isRunning) return;
+    setGrid(createGrid());
+  };
 
   // Toggle weight mode (null <-> weight)
   const toggleWeightMode = () => {
+    if (isRunning) return;
     setMode((prevMode) => (prevMode === "weight" ? null : "weight"));
   };
 
   // Toggle eraser mode (eraser <-> previous mode)
   const toggleEraserMode = () => {
+    if (isRunning) return;
     setMode((currentMode) => {
       if (currentMode === "eraser") {
         return prevMode;
@@ -64,6 +70,7 @@ export const usePathfinding = () => {
 
   // Handle mouse interactions
   const handleMouseDown = (row, col) => {
+    if (isRunning) return;
     setMouseIsPressed(true);
     const newGrid = grid.map((r) => r.map((n) => ({ ...n })));
     const node = newGrid[row][col];
@@ -91,7 +98,7 @@ export const usePathfinding = () => {
   };
 
   const handleMouseEnter = (row, col) => {
-    if (!mouseIsPressed) return;
+    if (!mouseIsPressed || isRunning) return;
     const newGrid = grid.map((r) => r.map((n) => ({ ...n })));
     const node = newGrid[row][col];
 
@@ -153,9 +160,14 @@ export const usePathfinding = () => {
 
   // Run algorithm with animations
   const runPathfindingAlgorithm = () => {
+    if (isRunning) return;
+    setIsRunning(true);
     const startNode = grid.flat().find((node) => node.isStart);
     const endNode = grid.flat().find((node) => node.isEnd);
-    if (!startNode || !endNode) return;
+    if (!startNode || !endNode) {
+      setIsRunning(false);
+      return;
+    }
 
     const { visitedNodesInOrder, newGrid } = runAlgorithm(
       algorithm,
@@ -178,7 +190,7 @@ export const usePathfinding = () => {
     );
 
     // Number of nodes to highlight simultaneously
-    const highlightWindow = 5; // Current node + 2 previous
+    const highlightWindow = 3; // Current node + 2 previous
 
     // Animate visited nodes with current node highlight
     visitedNodesInOrder.forEach((node, i) => {
@@ -234,11 +246,19 @@ export const usePathfinding = () => {
         });
       }, speed * (i + visitedNodesInOrder.length));
     });
+
+    // End running state after all animations
+    setTimeout(() => {
+      setIsRunning(false);
+    }, speed * (visitedNodesInOrder.length + shortestPath.length));
   };
 
   // Generate maze
-  const generatePathfindingMaze = (skew) => {
-    generateMaze(skew, grid, setGrid, bfs);
+  const generatePathfindingMaze = async (skew) => {
+    if (isRunning) return;
+    setIsRunning(true);
+    await generateMaze(skew, grid, setGrid, bfs);
+    setIsRunning(false);
   };
 
   return {
@@ -247,6 +267,7 @@ export const usePathfinding = () => {
     algorithm,
     speed,
     mazeType,
+    isRunning,
     resetGrid,
     toggleWeightMode,
     toggleEraserMode,
