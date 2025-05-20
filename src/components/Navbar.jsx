@@ -16,9 +16,9 @@ export default function Navbar({
   resetGrid,
 }) {
   return (
-    <nav className="w-full bg-gray-800 p-4 shadow-md">
+    <nav className="w-full bg-gray-800 py-6 px-4 shadow-md">
       <div className="flex flex-col xl:flex-row lg:items-center justify-between w-full gap-4">
-        <h1 className="text-3xl font-bold text-white">
+        <h1 className="text-2xl font-bold text-white text-center">
           Pathfinding Visualizer
         </h1>
         <Controls

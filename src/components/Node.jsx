@@ -37,7 +37,7 @@ export default function Node({ node, onMouseDown, onMouseEnter, onMouseUp }) {
 
   return (
     <div
-      className={`node w-6 h-6 ${bgColor} ${cursor} ${borderClass} ${animationClass} relative`}
+      className={`node w-full h-full ${bgColor} ${cursor} ${borderClass} ${animationClass} relative`}
       data-weight={weight}
       data-animation-key={animationKey}
       onMouseDown={() => onMouseDown(row, col)}
@@ -48,7 +48,7 @@ export default function Node({ node, onMouseDown, onMouseEnter, onMouseUp }) {
         {isEnd ? (
           <Target size={20} className="text-red-500" />
         ) : isStart ? (
-          <CircleArrowRight size={50} className="text-green-300" />
+          <CircleArrowRight size={22} className="text-green-300" />
         ) : weight > 1 ? (
           <Weight size={20} className="text-yellow-700" />
         ) : (

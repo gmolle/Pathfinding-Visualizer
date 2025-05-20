@@ -3,22 +3,22 @@ export default function AlgorithmDescription({ algorithm }) {
   switch (algorithm) {
     case "dijkstra":
       description =
-        "Dijkstra’s Algorithm explores all possible paths to find the shortest one, considering node weights. It is <strong>weighted</strong> and <em>guarantees the shortest path</em> by total weight.";
+        "Dijkstra’s Algorithm is a <strong><em>weighted</em></strong> algorithm and it <strong><em>guarantees</em></strong> the shortest path";
       break;
     case "astar":
       description =
-        "A* Algorithm uses a heuristic to efficiently search for the shortest path, incorporating node weights. It is <strong>weighted</strong> and <em>guarantees the shortest path</em> with an admissible heuristic.";
+        "A* Search is a <strong><em>weighted</em></strong> algorithm and it <strong><em>guarantees</em></strong> the shortest path";
       break;
     case "bfs":
       description =
-        "Breadth-First Search explores nodes level by level, ignoring weights. It is <strong>unweighted</strong> and <em>guarantees the shortest path</em> by number of nodes.";
+        "Breadth-First Search (BFS) is an <strong><em>unweighted</em></strong> algorithm and it <strong><em>guarantees</em></strong> the shortest path";
       break;
     default:
       description = "Select an algorithm to see its description.";
   }
 
   return (
-    <div className="text-center max-w-2xl mx-auto mb-4 px-4 text-gray-700">
+    <div className="text-center max-w-4xl mx-auto mb-4 px-4 text-gray-700">
       <p dangerouslySetInnerHTML={{ __html: description }} />
     </div>
   );

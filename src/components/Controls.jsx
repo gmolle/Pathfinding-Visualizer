@@ -16,7 +16,7 @@ export default function Controls({
   resetGrid,
 }) {
   return (
-    <div className="flex flex-wrap gap-4">
+    <div className="flex flex-col md:flex-row md:flex-wrap items-center justify-center gap-4 w-full max-w-7xl">
       <select
         className={`text-white px-3 py-2 rounded  transition-colors focus-visible:outline-none ${
           isRunning
@@ -48,7 +48,7 @@ export default function Controls({
       >
         Visualize
       </button>
-      <div className="flex items-center gap-2 relative text-white">
+      <div className="flex items-center gap-2 relative text-white px-3 py-2">
         <label htmlFor="speed" className={isRunning ? "opacity-50" : ""}>
           Speed:
         </label>
@@ -65,7 +65,7 @@ export default function Controls({
           disabled={isRunning}
         />
         <span
-          className={`absolute -top-3 right-0 ${isRunning ? "opacity-50" : ""}`}
+          className={`absolute -top-3 right-3 ${isRunning ? "opacity-50" : ""}`}
         >
           {speed}ms
         </span>

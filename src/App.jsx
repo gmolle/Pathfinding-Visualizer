@@ -27,7 +27,7 @@ function App() {
   } = usePathfinding();
 
   return (
-    <div className="min-h-screen flex flex-col items-center">
+    <div className="min-h-screen bg-white text-white p-0">
       <Navbar
         algorithm={algorithm}
         mode={mode}
@@ -43,15 +43,17 @@ function App() {
         generatePathfindingMaze={generatePathfindingMaze}
         resetGrid={resetGrid}
       />
-      <div className="mt-6">
+      <div className="">
         <Legend />
         <AlgorithmDescription algorithm={algorithm} />
-        <Grid
-          grid={grid}
-          onMouseDown={handleMouseDown}
-          onMouseEnter={handleMouseEnter}
-          onMouseUp={handleMouseUp}
-        />
+        <div className="p-4 pt-0">
+          <Grid
+            grid={grid}
+            onMouseDown={handleMouseDown}
+            onMouseEnter={handleMouseEnter}
+            onMouseUp={handleMouseUp}
+          />
+        </div>
       </div>
     </div>
   );

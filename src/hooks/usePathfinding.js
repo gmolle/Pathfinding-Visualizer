@@ -2,7 +2,7 @@ import { useState } from "react";
 import { runAlgorithm, bfs } from "../utils/algorithms";
 import { generateMaze } from "../utils/maze";
 
-const ROWS = 21;
+const ROWS = 31;
 const COLS = 51;
 
 // Initialize grid
@@ -14,8 +14,8 @@ const createGrid = () => {
       currentRow.push({
         row,
         col,
-        isStart: row === 10 && col === 5,
-        isEnd: row === 10 && col === 45,
+        isStart: row === 15 && col === 10,
+        isEnd: row === 15 && col === 40,
         weight: 1,
         isWall: false,
         isVisited: false,
