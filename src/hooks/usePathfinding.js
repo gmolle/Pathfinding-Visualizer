@@ -180,7 +180,7 @@ export const usePathfinding = () => {
     setGrid(
       grid.map((row) =>
         row.map((node) => {
-          if (node.isWall) return node; // Leave walls unchanged
+          if (node.isWall) return node;
 
           return {
             ...node,
@@ -194,7 +194,7 @@ export const usePathfinding = () => {
     );
 
     // Number of nodes to highlight simultaneously
-    const highlightWindow = 3; // Current node + 2 previous
+    const highlightWindow = 3;
 
     // Animate visited nodes with current node highlight
     visitedNodesInOrder.forEach((node, i) => {
