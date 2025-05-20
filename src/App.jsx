@@ -1,4 +1,3 @@
-// src/App.jsx
 import { usePathfinding } from "./hooks/usePathfinding";
 import Grid from "./components/Grid";
 import Legend from "./components/Legend";
@@ -14,6 +13,7 @@ function App() {
     mazeType,
     resetGrid,
     toggleWeightMode,
+    toggleEraserMode,
     handleMouseDown,
     handleMouseEnter,
     handleMouseUp,
@@ -37,6 +37,12 @@ function App() {
           <option value="astar">A*</option>
           <option value="bfs">BFS</option>
         </select>
+        <button
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 shadow-sm"
+          onClick={runPathfindingAlgorithm}
+        >
+          Visualize
+        </button>
         <select
           className="px-4 py-2 bg-white border rounded shadow-sm"
           value={mazeType}
@@ -51,14 +57,14 @@ function App() {
         </select>
         <button
           className={`${
-            mazeType == ""
+            mazeType === ""
               ? "px-4 py-2 bg-gray-500 text-white rounded shadow-sm"
-              : "px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 shadow-sm "
+              : "px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 shadow-sm"
           }`}
-          disabled={mazeType == ""}
+          disabled={mazeType === ""}
           onClick={() => generatePathfindingMaze(mazeType)}
         >
-          Generate Maze
+          Generate Pattern
         </button>
         <div className="flex items-center gap-2">
           <label htmlFor="speed">Speed: </label>
@@ -80,13 +86,17 @@ function App() {
           }`}
           onClick={toggleWeightMode}
         >
-          {mode === "weight" ? "Stop Placing Weights" : "Place Weights"}
+          {mode === "weight" ? "Place Walls" : "Place Weights"}
         </button>
         <button
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 shadow-sm"
-          onClick={runPathfindingAlgorithm}
+          className={`px-4 py-2 text-white rounded shadow-sm ${
+            mode === "eraser"
+              ? "bg-red-700 border-2 border-red-900"
+              : "bg-red-500 hover:bg-red-600"
+          }`}
+          onClick={toggleEraserMode}
         >
-          Run Algorithm
+          {mode === "eraser" ? "Stop Erasing" : "Eraser"}
         </button>
         <button
           className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 shadow-sm"

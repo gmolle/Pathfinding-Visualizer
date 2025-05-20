@@ -1,6 +1,5 @@
-// src/hooks/usePathfinding.js
 import { useState } from "react";
-import { runAlgorithm, bfs } from "../utils/algorithms"; // Add bfs import
+import { runAlgorithm, bfs } from "../utils/algorithms";
 import { generateMaze } from "../utils/maze";
 
 const ROWS = 21;
@@ -21,6 +20,7 @@ const createGrid = () => {
         isWall: false,
         isVisited: false,
         isPath: false,
+        isCurrent: false, // New property for current node highlight
         distance: Infinity,
         fScore: Infinity,
         previousNode: null,
@@ -34,94 +34,107 @@ const createGrid = () => {
 export const usePathfinding = () => {
   const [grid, setGrid] = useState(createGrid());
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
-  const [mode, setMode] = useState(null); // null (walls), "weight"
-  const [algorithm, setAlgorithm] = useState("dijkstra"); // "dijkstra", "astar", "bfs"
-  const [speed, setSpeed] = useState(10); // Animation speed (ms)
-  const [mazeType, setMazeType] = useState(""); // "none", "horizontal", "vertical"
+  const [mode, setMode] = useState(null); // null (walls), "weight", "eraser"
+  const [prevMode, setPrevMode] = useState(null);
+  const [algorithm, setAlgorithm] = useState("dijkstra");
+  const [speed, setSpeed] = useState(10);
+  const [mazeType, setMazeType] = useState("");
   const [dragging, setDragging] = useState(null); // null, "start", "end"
 
   // Reset grid
   const resetGrid = () => setGrid(createGrid());
 
-  // Toggle weight mode
+  // Toggle weight mode (null <-> weight)
   const toggleWeightMode = () => {
     setMode((prevMode) => (prevMode === "weight" ? null : "weight"));
+  };
+
+  // Toggle eraser mode (eraser <-> previous mode)
+  const toggleEraserMode = () => {
+    setMode((currentMode) => {
+      if (currentMode === "eraser") {
+        return prevMode;
+      } else {
+        setPrevMode(currentMode);
+        return "eraser";
+      }
+    });
   };
 
   // Handle mouse interactions
   const handleMouseDown = (row, col) => {
     setMouseIsPressed(true);
     const newGrid = grid.map((r) => r.map((n) => ({ ...n })));
-    console.log(
-      `MouseDown: row=${row}, col=${col}, mode=${mode}, dragging=${dragging}`
-    );
+    const node = newGrid[row][col];
 
-    if (newGrid[row][col].isStart) {
+    if (node.isStart) {
       setDragging("start");
-    } else if (newGrid[row][col].isEnd) {
+    } else if (node.isEnd) {
       setDragging("end");
-    } else if (
-      mode === "weight" &&
-      !newGrid[row][col].isStart &&
-      !newGrid[row][col].isEnd &&
-      !newGrid[row][col].isWall
-    ) {
-      newGrid[row][col].weight = newGrid[row][col].weight === 2 ? 1 : 2;
+    } else if (mode === "eraser") {
+      node.isWall = false;
+      node.weight = 1;
       setGrid(newGrid);
-    } else if (
-      !newGrid[row][col].isStart &&
-      !newGrid[row][col].isEnd &&
-      newGrid[row][col].weight === 1
-    ) {
-      newGrid[row][col].isWall = !newGrid[row][col].isWall;
+    } else if (mode === "weight" && !node.isStart && !node.isEnd) {
+      node.weight = node.weight === 2 ? 1 : 2;
+      node.isWall = false;
+      setGrid(newGrid);
+    } else if (!node.isStart && !node.isEnd) {
+      node.isWall = !node.isWall;
+      node.weight = 1;
       setGrid(newGrid);
     }
   };
 
   const handleMouseEnter = (row, col) => {
     if (!mouseIsPressed) return;
-    console.log(
-      `MouseEnter: row=${row}, col=${col}, mode=${mode}, dragging=${dragging}`
-    );
     const newGrid = grid.map((r) => r.map((n) => ({ ...n })));
+    const node = newGrid[row][col];
 
     if (
       dragging === "start" &&
-      !newGrid[row][col].isWall &&
-      newGrid[row][col].weight === 1 &&
-      !newGrid[row][col].isEnd
+      !node.isWall &&
+      node.weight === 1 &&
+      !node.isEnd
     ) {
-      newGrid.forEach((r) => r.forEach((node) => (node.isStart = false)));
-      newGrid[row][col].isStart = true;
-      newGrid[row][col].weight = 1;
-      newGrid[row][col].isWall = false;
+      newGrid.forEach((r) => r.forEach((n) => (n.isStart = false)));
+      node.isStart = true;
+      node.weight = 1;
+      node.isWall = false;
       setGrid(newGrid);
     } else if (
       dragging === "end" &&
-      !newGrid[row][col].isWall &&
-      newGrid[row][col].weight === 1 &&
-      !newGrid[row][col].isStart
+      !node.isWall &&
+      node.weight === 1 &&
+      !node.isStart
     ) {
-      newGrid.forEach((r) => r.forEach((node) => (node.isEnd = false)));
-      newGrid[row][col].isEnd = true;
-      newGrid[row][col].weight = 1;
-      newGrid[row][col].isWall = false;
+      newGrid.forEach((r) => r.forEach((n) => (n.isEnd = false)));
+      node.isEnd = true;
+      node.weight = 1;
+      node.isWall = false;
+      setGrid(newGrid);
+    } else if (mode === "eraser" && !node.isStart && !node.isEnd) {
+      node.isWall = false;
+      node.weight = 1;
       setGrid(newGrid);
     } else if (
       mode === "weight" &&
-      !newGrid[row][col].isStart &&
-      !newGrid[row][col].isEnd &&
-      !newGrid[row][col].isWall
+      !node.isStart &&
+      !node.isEnd &&
+      !node.isWall &&
+      node.weight !== 2
     ) {
-      newGrid[row][col].weight = newGrid[row][col].weight === 2 ? 1 : 2;
+      node.weight = 2;
       setGrid(newGrid);
     } else if (
-      !newGrid[row][col].isStart &&
-      !newGrid[row][col].isEnd &&
-      newGrid[row][col].weight === 1
+      mode === null &&
+      !node.isStart &&
+      !node.isEnd &&
+      !node.isWall &&
+      node.weight === 1
     ) {
-      newGrid[row][col].isWall = !newGrid[row][col].isWall;
-      newGrid[row][col].weight = 1;
+      node.isWall = true;
+      node.weight = 1;
       setGrid(newGrid);
     }
   };
@@ -129,7 +142,6 @@ export const usePathfinding = () => {
   const handleMouseUp = () => {
     setMouseIsPressed(false);
     setDragging(null);
-    console.log("MouseUp");
   };
 
   // Run algorithm with animations
@@ -152,20 +164,35 @@ export const usePathfinding = () => {
           ...node,
           isVisited: false,
           isPath: false,
+          isCurrent: false, // Reset isCurrent
         }))
       )
     );
 
-    // Animate visited nodes
+    // Animate visited nodes with current node highlight
     visitedNodesInOrder.forEach((node, i) => {
       setTimeout(() => {
         setGrid((prevGrid) => {
           const updatedGrid = prevGrid.map((r) => r.map((n) => ({ ...n })));
+          // Clear previous current node
+          updatedGrid.forEach((r) => r.forEach((n) => (n.isCurrent = false)));
+          // Set current node and visited status
           if (!node.isStart && !node.isEnd) {
+            updatedGrid[node.row][node.col].isCurrent = true;
             updatedGrid[node.row][node.col].isVisited = true;
           }
           return updatedGrid;
         });
+        // Clear isCurrent after a short delay
+        setTimeout(() => {
+          setGrid((prevGrid) => {
+            const updatedGrid = prevGrid.map((r) => r.map((n) => ({ ...n })));
+            if (!node.isStart && !node.isEnd) {
+              updatedGrid[node.row][node.col].isCurrent = false;
+            }
+            return updatedGrid;
+          });
+        }, speed * 0.8); // Clear isCurrent before next node (80% of speed)
       }, speed * i);
     });
 
@@ -193,7 +220,7 @@ export const usePathfinding = () => {
 
   // Generate maze
   const generatePathfindingMaze = (skew) => {
-    generateMaze(skew, grid, setGrid, bfs); // Pass bfs
+    generateMaze(skew, grid, setGrid, bfs);
   };
 
   return {
@@ -204,6 +231,7 @@ export const usePathfinding = () => {
     mazeType,
     resetGrid,
     toggleWeightMode,
+    toggleEraserMode,
     handleMouseDown,
     handleMouseEnter,
     handleMouseUp,
