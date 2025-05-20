@@ -9,7 +9,7 @@ export default function Legend() {
       </div>
       <div className="flex items-center gap-2">
         <Target size={30} className="text-red-500" />
-        <span>End</span>
+        <span>Target</span>
       </div>
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 bg-gray-900"></div>

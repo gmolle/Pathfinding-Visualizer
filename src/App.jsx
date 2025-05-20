@@ -46,7 +46,7 @@ function App() {
       <div className="">
         <Legend />
         <AlgorithmDescription algorithm={algorithm} />
-        <div className="p-4 pt-0">
+        <div className="p-8 pt-0">
           <Grid
             grid={grid}
             onMouseDown={handleMouseDown}
