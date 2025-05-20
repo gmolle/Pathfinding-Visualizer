@@ -15,6 +15,14 @@ export default function Controls({
   generatePathfindingMaze,
   resetGrid,
 }) {
+  const handleAlgorithmChange = (e) => {
+    if (isRunning) return; // Prevent changes during isRunning
+    const newAlgorithm = e.target.value;
+    if (newAlgorithm === "bfs" && mode === "weight") {
+      toggleWeightMode(); // Turn off Weight Mode if switching to BFS
+    }
+    setAlgorithm(newAlgorithm);
+  };
   return (
     <div className="flex flex-col md:flex-row md:flex-wrap items-center justify-center gap-4 w-full max-w-7xl">
       <select
@@ -24,7 +32,7 @@ export default function Controls({
             : "hover:text-sky-400 cursor-pointer"
         }`}
         value={algorithm}
-        onChange={(e) => !isRunning && setAlgorithm(e.target.value)}
+        onChange={(e) => handleAlgorithmChange(e)}
         disabled={isRunning}
       >
         <option value="dijkstra" className="bg-gray-700 text-white">
@@ -108,14 +116,14 @@ export default function Controls({
       </button>
       <button
         className={`flex items-center gap-2 px-4 py-2 font-semibold transition-colors   ${
-          isRunning
+          isRunning || algorithm == "bfs"
             ? "opacity-50 cursor-not-allowed text-white"
             : mode === "weight"
             ? "text-sky-400 hover:text-sky-600 cursor-pointer"
             : "text-white hover:text-sky-400 cursor-pointer"
         }`}
         onClick={toggleWeightMode}
-        disabled={isRunning}
+        disabled={isRunning || algorithm == "bfs"}
       >
         {mode === "weight" ? "Weight Mode: ON" : "Weight Mode: OFF"}
         <Weight size={20} />
