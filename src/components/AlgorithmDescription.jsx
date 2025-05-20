@@ -1,25 +1,43 @@
 export default function AlgorithmDescription({ algorithm }) {
-  let description = "";
-  switch (algorithm) {
-    case "dijkstra":
-      description =
-        "Dijkstra’s Algorithm is a <strong><em>weighted</em></strong> algorithm and it <strong><em>guarantees</em></strong> the shortest path";
-      break;
-    case "astar":
-      description =
-        "A* Search is a <strong><em>weighted</em></strong> algorithm and it <strong><em>guarantees</em></strong> the shortest path";
-      break;
-    case "bfs":
-      description =
-        "Breadth-First Search (BFS) is an <strong><em>unweighted</em></strong> algorithm and it <strong><em>guarantees</em></strong> the shortest path";
-      break;
-    default:
-      description = "Select an algorithm to see its description.";
-  }
+  const algorithms = {
+    dijkstra: {
+      name: "Dijkstra’s Algorithm",
+      weighted: true,
+      guaranteedShortest: true,
+    },
+    astar: {
+      name: "A* Search",
+      weighted: true,
+      guaranteedShortest: true,
+    },
+    bfs: {
+      name: "Breadth-First Search (BFS)",
+      weighted: false,
+      guaranteedShortest: true,
+    },
+  };
+
+  const algo = algorithms[algorithm] || null;
 
   return (
     <div className="text-center max-w-4xl mx-auto mb-4 px-4 text-gray-700">
-      <p dangerouslySetInnerHTML={{ __html: description }} />
+      <p>
+        {algo ? (
+          <>
+            {algo.name} is a{" "}
+            <span className="font-bold italic">
+              {algo.weighted ? "weighted" : "unweighted"}
+            </span>{" "}
+            algorithm and it{" "}
+            <span className="font-bold italic">
+              {algo.guaranteedShortest ? "guarantees" : "does not guarantee"}
+            </span>{" "}
+            the shortest path
+          </>
+        ) : (
+          "Select an algorithm to see its description."
+        )}
+      </p>
     </div>
   );
 }

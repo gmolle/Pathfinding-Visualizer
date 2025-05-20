@@ -16,10 +16,10 @@ export default function Controls({
   resetGrid,
 }) {
   const handleAlgorithmChange = (e) => {
-    if (isRunning) return; // Prevent changes during isRunning
+    if (isRunning) return;
     const newAlgorithm = e.target.value;
     if (newAlgorithm === "bfs" && mode === "weight") {
-      toggleWeightMode(); // Turn off Weight Mode if switching to BFS
+      toggleWeightMode();
     }
     setAlgorithm(newAlgorithm);
   };
