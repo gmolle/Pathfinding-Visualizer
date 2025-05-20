@@ -9,19 +9,20 @@ export default function Node({ node, onMouseDown, onMouseEnter, onMouseUp }) {
     isPath,
     isVisited,
     isCurrent,
+    animationKey,
   } = node;
   const bgColor = isCurrent
-    ? "bg-purple-500" // Highlight current node
+    ? "bg-purple-400"
     : isStart
     ? "bg-green-500"
     : isEnd
     ? "bg-red-500"
     : isWall
-    ? "bg-gray-800"
+    ? "bg-gray-900"
     : isPath
-    ? "bg-yellow-400"
+    ? "bg-yellow-300"
     : isVisited
-    ? "bg-blue-200"
+    ? "bg-cyan-300"
     : weight === 2
     ? "bg-gray-400"
     : "bg-white";
@@ -29,7 +30,7 @@ export default function Node({ node, onMouseDown, onMouseEnter, onMouseUp }) {
   const borderClass =
     isWall || isPath ? "" : "border-r border-b border-blue-300";
   const animationClass = isCurrent
-    ? "animate-pulse" // Pulse for current node
+    ? "animate-pulse"
     : isWall || isPath || weight === 2
     ? "animate-pop-in"
     : "";
@@ -38,6 +39,7 @@ export default function Node({ node, onMouseDown, onMouseEnter, onMouseUp }) {
     <div
       className={`node w-6 h-6 ${bgColor} ${cursor} ${borderClass} ${animationClass}`}
       data-weight={weight}
+      data-animation-key={animationKey}
       onMouseDown={() => onMouseDown(row, col)}
       onMouseEnter={() => onMouseEnter(row, col)}
       onMouseUp={() => onMouseUp(row, col)}

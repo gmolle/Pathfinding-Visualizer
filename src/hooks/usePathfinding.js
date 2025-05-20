@@ -20,7 +20,8 @@ const createGrid = () => {
         isWall: false,
         isVisited: false,
         isPath: false,
-        isCurrent: false, // New property for current node highlight
+        isCurrent: false,
+        animationKey: 0,
         distance: Infinity,
         fScore: Infinity,
         previousNode: null,
@@ -37,7 +38,7 @@ export const usePathfinding = () => {
   const [mode, setMode] = useState(null); // null (walls), "weight", "eraser"
   const [prevMode, setPrevMode] = useState(null);
   const [algorithm, setAlgorithm] = useState("dijkstra");
-  const [speed, setSpeed] = useState(10);
+  const [speed, setSpeed] = useState(30); // Increased for pulse visibility
   const [mazeType, setMazeType] = useState("");
   const [dragging, setDragging] = useState(null); // null, "start", "end"
 
@@ -74,14 +75,17 @@ export const usePathfinding = () => {
     } else if (mode === "eraser") {
       node.isWall = false;
       node.weight = 1;
+      node.animationKey += 1;
       setGrid(newGrid);
     } else if (mode === "weight" && !node.isStart && !node.isEnd) {
       node.weight = node.weight === 2 ? 1 : 2;
       node.isWall = false;
+      node.animationKey += 1;
       setGrid(newGrid);
     } else if (!node.isStart && !node.isEnd) {
       node.isWall = !node.isWall;
       node.weight = 1;
+      node.animationKey += 1;
       setGrid(newGrid);
     }
   };
@@ -116,6 +120,7 @@ export const usePathfinding = () => {
     } else if (mode === "eraser" && !node.isStart && !node.isEnd) {
       node.isWall = false;
       node.weight = 1;
+      node.animationKey += 1;
       setGrid(newGrid);
     } else if (
       mode === "weight" &&
@@ -125,6 +130,7 @@ export const usePathfinding = () => {
       node.weight !== 2
     ) {
       node.weight = 2;
+      node.animationKey += 1;
       setGrid(newGrid);
     } else if (
       mode === null &&
@@ -135,6 +141,7 @@ export const usePathfinding = () => {
     ) {
       node.isWall = true;
       node.weight = 1;
+      node.animationKey += 1;
       setGrid(newGrid);
     }
   };
@@ -164,37 +171,47 @@ export const usePathfinding = () => {
           ...node,
           isVisited: false,
           isPath: false,
-          isCurrent: false, // Reset isCurrent
+          isCurrent: false,
+          animationKey: 0,
         }))
       )
     );
+
+    // Number of nodes to highlight simultaneously
+    const highlightWindow = 5; // Current node + 2 previous
 
     // Animate visited nodes with current node highlight
     visitedNodesInOrder.forEach((node, i) => {
       setTimeout(() => {
         setGrid((prevGrid) => {
           const updatedGrid = prevGrid.map((r) => r.map((n) => ({ ...n })));
-          // Clear previous current node
-          updatedGrid.forEach((r) => r.forEach((n) => (n.isCurrent = false)));
+          // Clear isCurrent for nodes outside the highlight window
+          if (i >= highlightWindow) {
+            const oldNode = visitedNodesInOrder[i - highlightWindow];
+            if (!oldNode.isStart && !oldNode.isEnd) {
+              updatedGrid[oldNode.row][oldNode.col].isCurrent = false;
+              updatedGrid[oldNode.row][oldNode.col].animationKey += 1;
+            }
+          }
           // Set current node and visited status
           if (!node.isStart && !node.isEnd) {
             updatedGrid[node.row][node.col].isCurrent = true;
             updatedGrid[node.row][node.col].isVisited = true;
+            updatedGrid[node.row][node.col].animationKey += 1;
           }
           return updatedGrid;
         });
-        // Clear isCurrent after a short delay
-        setTimeout(() => {
-          setGrid((prevGrid) => {
-            const updatedGrid = prevGrid.map((r) => r.map((n) => ({ ...n })));
-            if (!node.isStart && !node.isEnd) {
-              updatedGrid[node.row][node.col].isCurrent = false;
-            }
-            return updatedGrid;
-          });
-        }, speed * 0.8); // Clear isCurrent before next node (80% of speed)
       }, speed * i);
     });
+
+    // Clear remaining isCurrent after visited nodes animation
+    setTimeout(() => {
+      setGrid((prevGrid) => {
+        const updatedGrid = prevGrid.map((r) => r.map((n) => ({ ...n })));
+        updatedGrid.forEach((r) => r.forEach((n) => (n.isCurrent = false)));
+        return updatedGrid;
+      });
+    }, speed * visitedNodesInOrder.length);
 
     // Trace shortest path
     const shortestPath = [];
@@ -211,6 +228,7 @@ export const usePathfinding = () => {
           const updatedGrid = prevGrid.map((r) => r.map((n) => ({ ...n })));
           if (!node.isStart && !node.isEnd) {
             updatedGrid[node.row][node.col].isPath = true;
+            updatedGrid[node.row][node.col].animationKey += 1;
           }
           return updatedGrid;
         });
