@@ -20,27 +20,29 @@
   0%,
   100% {
     opacity: 1;
+    border-radius: 0;
   }
   50% {
     opacity: 0.5;
+    border-radius: 50%;
   }
 }
 
 .animate-pulse {
-  animation: pulse 1000ms ease-in-out infinite;
+  animation: pulse 1ms ease-in-out;
 }
 
 @keyframes visitedNode {
   0% {
-    background-color: #53eafd;
+    background-color: #162456;
     border-radius: 50%;
   }
   50% {
-    background-color: rgba(0, 217, 159, 0.75);
+    background-color: #0084d1;
     border-radius: 25%;
   }
   75% {
-    background-color: #c6d2ff;
+    background-color: #00bc7d;
     border-radius: 10%;
   }
   100% {
