@@ -39,7 +39,7 @@ export const usePathfinding = () => {
   const [mode, setMode] = useState(null); // null (walls), "weight", "eraser"
   const [prevMode, setPrevMode] = useState(null);
   const [algorithm, setAlgorithm] = useState("dijkstra");
-  const [speed, setSpeed] = useState(100); // For pulse visibility
+  const [speed, setSpeed] = useState(100); // Default 100ms
   const [mazeType, setMazeType] = useState("");
   const [dragging, setDragging] = useState(null); // null, "start", "end"
   const [isRunning, setIsRunning] = useState(false);
@@ -201,8 +201,8 @@ export const usePathfinding = () => {
     // Batching parameters
     const visitedBatchSize = 6;
     const pathBatchSize = 1;
-    const visitedSleep = 50; // 50ms/batch, ~10ms/node
-    const pathSleep = 50; // 50ms/node
+    const visitedSleep = speed; // Use speed from slider (1–200ms)
+    const pathSleep = 50; // Use speed from slider (1–200ms)
 
     // Helper to check if a node is an immediate neighbor of the start node
     const isStartNeighbor = (node) => {
