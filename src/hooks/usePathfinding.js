@@ -159,6 +159,7 @@ export const usePathfinding = () => {
   };
 
   // Run algorithm with animations
+  // Run algorithm with animations
   const runPathfindingAlgorithm = () => {
     if (isRunning) return;
     setIsRunning(true);
@@ -174,6 +175,11 @@ export const usePathfinding = () => {
       grid,
       startNode,
       endNode
+    );
+
+    // Filter out start node from visitedNodesInOrder to avoid animating it
+    const filteredVisitedNodes = visitedNodesInOrder.filter(
+      (node) => !node.isStart
     );
 
     // Reset grid for animation
@@ -193,41 +199,86 @@ export const usePathfinding = () => {
       )
     );
 
-    // Number of nodes to highlight simultaneously
-    const highlightWindow = 3;
+    // Batching parameters
+    const visitedBatchSize = 5; // Increased from 5 to 10
+    const pathBatchSize = 1; // Increased from 5 to 8
+    const visitedSleep = 50; // Fixed 12ms per batch (~1.2ms/node)
+    const pathSleep = 50; // Fixed 20ms per batch (~2.5ms/node)
+    const highlightWindow = 25; // Increased from 3 to 5 for more simultaneous highlights
 
-    // Animate visited nodes with current node highlight
-    visitedNodesInOrder.forEach((node, i) => {
+    // Helper to check if a node is an immediate neighbor of the start node
+    const isStartNeighbor = (node) => {
+      return (
+        node.row >= startNode.row - 1 &&
+        node.row <= startNode.row + 1 &&
+        node.col >= startNode.col - 1 &&
+        node.col <= startNode.col + 1 &&
+        !(node.row === startNode.row && node.col === startNode.col)
+      );
+    };
+
+    // Animate visited nodes in batches
+    for (let i = 0; i < filteredVisitedNodes.length; i += visitedBatchSize) {
       setTimeout(() => {
         setGrid((prevGrid) => {
           const updatedGrid = prevGrid.map((r) => r.map((n) => ({ ...n })));
-          // Clear isCurrent for nodes outside the highlight window
-          if (i >= highlightWindow) {
-            const oldNode = visitedNodesInOrder[i - highlightWindow];
-            if (!oldNode.isStart && !oldNode.isEnd) {
-              updatedGrid[oldNode.row][oldNode.col].isCurrent = false;
-              updatedGrid[oldNode.row][oldNode.col].animationKey += 1;
+          // Process batch of nodes
+          for (
+            let j = i;
+            j < Math.min(i + visitedBatchSize, filteredVisitedNodes.length);
+            j++
+          ) {
+            const node = filteredVisitedNodes[j];
+            if (!node.isStart && !node.isEnd && !isStartNeighbor(node)) {
+              updatedGrid[node.row][node.col].isCurrent = true;
+              updatedGrid[node.row][node.col].isVisited = true;
+              updatedGrid[node.row][node.col].animationKey += 1;
+            } else if (!node.isStart && !node.isEnd) {
+              updatedGrid[node.row][node.col].isVisited = true;
+              updatedGrid[node.row][node.col].animationKey += 1;
             }
           }
-          // Set current node and visited status
-          if (!node.isStart && !node.isEnd) {
-            updatedGrid[node.row][node.col].isCurrent = true;
-            updatedGrid[node.row][node.col].isVisited = true;
-            updatedGrid[node.row][node.col].animationKey += 1;
+          // Clear isCurrent for nodes outside the highlight window
+          if (i >= highlightWindow) {
+            for (
+              let k = Math.max(0, i - highlightWindow);
+              k <
+              Math.min(
+                i - highlightWindow + visitedBatchSize,
+                filteredVisitedNodes.length
+              );
+              k++
+            ) {
+              const oldNode = filteredVisitedNodes[k];
+              if (
+                !oldNode.isStart &&
+                !oldNode.isEnd &&
+                !isStartNeighbor(oldNode)
+              ) {
+                updatedGrid[oldNode.row][oldNode.col].isCurrent = false;
+                updatedGrid[oldNode.row][oldNode.col].animationKey += 1;
+              }
+            }
           }
           return updatedGrid;
         });
-      }, speed * i);
-    });
+      }, visitedSleep * (i / visitedBatchSize)); // Scale by batch index
+    }
 
     // Clear remaining isCurrent after visited nodes animation
     setTimeout(() => {
       setGrid((prevGrid) => {
         const updatedGrid = prevGrid.map((r) => r.map((n) => ({ ...n })));
-        updatedGrid.forEach((r) => r.forEach((n) => (n.isCurrent = false)));
+        updatedGrid.forEach((r) =>
+          r.forEach((n) => {
+            if (!isStartNeighbor(n)) {
+              n.isCurrent = false;
+            }
+          })
+        );
         return updatedGrid;
       });
-    }, speed * visitedNodesInOrder.length);
+    }, visitedSleep * Math.ceil(filteredVisitedNodes.length / visitedBatchSize));
 
     // Trace shortest path
     const shortestPath = [];
@@ -236,25 +287,33 @@ export const usePathfinding = () => {
       shortestPath.push(currentNode);
       currentNode = currentNode.previousNode;
     }
+    shortestPath.reverse();
 
-    // Animate shortest path
-    shortestPath.reverse().forEach((node, i) => {
+    // Animate shortest path in batches
+    for (let i = 0; i < shortestPath.length; i += pathBatchSize) {
       setTimeout(() => {
         setGrid((prevGrid) => {
           const updatedGrid = prevGrid.map((r) => r.map((n) => ({ ...n })));
-          if (!node.isStart && !node.isEnd) {
-            updatedGrid[node.row][node.col].isPath = true;
-            updatedGrid[node.row][node.col].animationKey += 1;
+          for (
+            let j = i;
+            j < Math.min(i + pathBatchSize, shortestPath.length);
+            j++
+          ) {
+            const node = shortestPath[j];
+            if (!node.isStart && !node.isEnd) {
+              updatedGrid[node.row][node.col].isPath = true;
+              updatedGrid[node.row][node.col].animationKey += 1;
+            }
           }
           return updatedGrid;
         });
-      }, speed * (i + visitedNodesInOrder.length));
-    });
+      }, visitedSleep * Math.ceil(filteredVisitedNodes.length / visitedBatchSize) + pathSleep * (i / pathBatchSize));
+    }
 
     // End running state after all animations
     setTimeout(() => {
       setIsRunning(false);
-    }, speed * (visitedNodesInOrder.length + shortestPath.length));
+    }, visitedSleep * Math.ceil(filteredVisitedNodes.length / visitedBatchSize) + pathSleep * Math.ceil(shortestPath.length / pathBatchSize));
   };
 
   // Generate maze

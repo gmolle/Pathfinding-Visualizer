@@ -14,12 +14,12 @@ export default function Node({ node, onMouseDown, onMouseEnter, onMouseUp }) {
     animationKey,
   } = node;
 
-  const bgColor = isCurrent
+  const bgColor = isPath
+    ? "bg-yellow-300"
+    : isCurrent
     ? "bg-purple-400"
     : isWall
     ? "bg-gray-900"
-    : isPath
-    ? "bg-yellow-300"
     : isVisited
     ? "bg-cyan-300"
     : weight === 2
@@ -27,17 +27,22 @@ export default function Node({ node, onMouseDown, onMouseEnter, onMouseUp }) {
     : "bg-white";
 
   const cursor = isStart || isEnd ? "cursor-grab" : "cursor-default";
+  // Apply borders to all nodes except walls to maintain grid structure
   const borderClass =
     isWall || isPath ? "" : "border-r border-b border-blue-300";
-  const animationClass = isCurrent
+  const animationClass = isPath
+    ? "animate-pop-in"
+    : isCurrent
     ? "animate-pulse"
-    : isWall || isPath || weight === 2
+    : isVisited
+    ? "animate-visited"
+    : isWall || weight === 2
     ? "animate-pop-in"
     : "";
 
   return (
     <div
-      className={`node w-full h-full ${bgColor} ${cursor} ${borderClass} ${animationClass} relative`}
+      className={`node w-full h-full ${bgColor} ${cursor} ${borderClass} ${animationClass} relative transition-all duration-100`} // Added transition
       data-weight={weight}
       data-animation-key={animationKey}
       onMouseDown={() => onMouseDown(row, col)}

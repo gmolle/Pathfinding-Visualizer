@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @keyframes popIn {
   0% {
     transform: scale(0);
@@ -26,5 +27,28 @@
 }
 
 .animate-pulse {
-  animation: pulse 500ms ease-in-out infinite;
+  animation: pulse 1000ms ease-in-out infinite;
+}
+
+@keyframes visitedNode {
+  0% {
+    background-color: #53eafd;
+    border-radius: 50%;
+  }
+  50% {
+    background-color: rgba(0, 217, 159, 0.75);
+    border-radius: 25%;
+  }
+  75% {
+    background-color: #c6d2ff;
+    border-radius: 10%;
+  }
+  100% {
+    background-color: #53eafd;
+    border-radius: 0;
+  }
+}
+
+.animate-visited {
+  animation: visitedNode 1250ms ease-out forwards;
 }
