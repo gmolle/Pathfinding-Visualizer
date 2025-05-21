@@ -191,6 +191,49 @@ export const bfs = (grid, startNode, endNode) => {
   return { visitedNodesInOrder, newGrid };
 };
 
+// BFS Algorithm (Unweighted)
+export const dfs = (grid, startNode, endNode) => {
+  const newGrid = grid.map((row) =>
+    row.map((node) => ({
+      ...node,
+      isVisited: false,
+      isPath: false,
+      previousNode: null,
+    }))
+  );
+
+  const stack = [newGrid[startNode.row][startNode.col]];
+  const visitedNodesInOrder = [];
+
+  while (stack.length) {
+    const currentNode = stack.pop();
+
+    if (currentNode.isVisited) continue; // Skip if already visited
+
+    currentNode.isVisited = true;
+    visitedNodesInOrder.push(currentNode);
+
+    if (currentNode === newGrid[endNode.row][endNode.col]) break;
+
+    const { row, col } = currentNode;
+    const neighbors = [];
+
+    if (col > 0) neighbors.push(newGrid[row][col - 1]);
+    if (row < grid.length - 1) neighbors.push(newGrid[row + 1][col]);
+    if (col < grid[0].length - 1) neighbors.push(newGrid[row][col + 1]);
+    if (row > 0) neighbors.push(newGrid[row - 1][col]);
+
+    for (const neighbor of neighbors) {
+      if (!neighbor.isWall && !neighbor.isVisited) {
+        neighbor.previousNode = currentNode;
+        stack.push(neighbor);
+      }
+    }
+  }
+
+  return { visitedNodesInOrder, newGrid };
+};
+
 export const runAlgorithm = (algorithm, grid, startNode, endNode) => {
   switch (algorithm) {
     case "dijkstra":
@@ -201,6 +244,8 @@ export const runAlgorithm = (algorithm, grid, startNode, endNode) => {
       return bfs(grid, startNode, endNode);
     case "greedy":
       return greedyBestFirst(grid, startNode, endNode);
+    case "dfs":
+      return dfs(grid, startNode, endNode);
     default:
       return { visitedNodesInOrder: [], newGrid: grid };
   }

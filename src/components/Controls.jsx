@@ -52,10 +52,13 @@ function Controls({
           A* Search
         </option>
         <option value="bfs" className="bg-gray-700 text-white">
-          BFS
+          Breadth-First Search
         </option>
         <option value="greedy" className="bg-gray-700 text-white">
           Greedy Best-First
+        </option>
+        <option value="dfs" className="bg-gray-700 text-white">
+          Depth-First Search
         </option>
       </select>
       <button
@@ -145,14 +148,22 @@ function Controls({
       </button>
       <button
         className={`flex items-center gap-1 px-3 py-1 text-sm font-semibold transition-colors flex-shrink-0 ${
-          isRunning || algorithm === "bfs" || algorithm === "greedy"
+          isRunning ||
+          algorithm === "bfs" ||
+          algorithm === "greedy" ||
+          algorithm === "dfs"
             ? "opacity-50 cursor-not-allowed text-white"
             : mode === "weight"
             ? "text-sky-400 hover:text-sky-600 cursor-pointer"
             : "text-white hover:text-sky-400 cursor-pointer"
         }`}
         onClick={toggleWeightMode}
-        disabled={isRunning || algorithm === "bfs" || algorithm === "greedy"}
+        disabled={
+          isRunning ||
+          algorithm === "bfs" ||
+          algorithm === "greedy" ||
+          algorithm === "dfs"
+        }
       >
         {mode === "weight" ? "Weight Mode: ON" : "Weight Mode: OFF"}
         <Weight size={16} />

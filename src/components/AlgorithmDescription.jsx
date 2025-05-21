@@ -28,6 +28,11 @@ export default function AlgorithmDescription({
       weighted: true,
       guaranteedShortest: false,
     },
+    dfs: {
+      name: "Depth-First Search (DFS)",
+      weighted: false,
+      guaranteedShortest: false,
+    },
   };
 
   const algo = algorithms[algorithm] || null;
