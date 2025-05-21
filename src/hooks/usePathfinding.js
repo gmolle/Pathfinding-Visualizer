@@ -45,7 +45,7 @@ export const usePathfinding = () => {
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [mode, setMode] = useState(null); // null (walls), "weight", "eraser"
   const [prevMode, setPrevMode] = useState(null);
-  const [algorithm, setAlgorithm] = useState("dijkstra");
+  const [algorithm, setAlgorithm] = useState("");
   const [speed, setSpeed] = useState(100); // Default 100ms
   const [mazeType, setMazeType] = useState("");
   const [dragging, setDragging] = useState(null); // null, "start", "end"

@@ -48,8 +48,11 @@ function Controls({
         onChange={handleAlgorithmChange}
         disabled={isRunning}
       >
+        <option value="" className="bg-gray-700 text-white">
+          Select Algorithm
+        </option>
         <option value="dijkstra" className="bg-gray-700 text-white">
-          Dijkstra's
+          Dijkstra's Algorithm
         </option>
         <option value="astar" className="bg-gray-700 text-white">
           A* Search
@@ -69,12 +72,12 @@ function Controls({
       </select>
       <button
         className={`px-3 py-1 text-sm font-semibold rounded-lg transition-colors flex-shrink-0 ${
-          isRunning
+          algorithm === "" || isRunning
             ? "bg-gray-600 text-white cursor-not-allowed opacity-50"
             : "bg-sky-400 hover:bg-sky-600 text-white cursor-pointer"
         }`}
         onClick={runPathfindingAlgorithm}
-        disabled={isRunning}
+        disabled={algorithm === "" || isRunning}
       >
         Visualize
       </button>
