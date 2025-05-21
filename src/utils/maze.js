@@ -50,10 +50,70 @@ export const generateRandomScatter = async (grid, setGrid, bfs) => {
   setGrid(newGrid);
 };
 
+export const generateWeightRandomScatter = async (grid, setGrid, bfs) => {
+  const ROWS = grid.length;
+  const COLS = grid[0].length;
+
+  let newGrid = grid.map((row, rowIndex) =>
+    row.map((node, colIndex) => {
+      const isInner =
+        rowIndex > 0 &&
+        rowIndex < ROWS - 1 &&
+        colIndex > 0 &&
+        colIndex < COLS - 1;
+      return {
+        ...node,
+        isWall: false, // Ensure no walls
+        weight:
+          node.isStart || node.isEnd
+            ? 1
+            : isInner && Math.random() < 0.2
+            ? 2
+            : 1,
+        isVisited: false,
+        isPath: false,
+        animationKey: node.animationKey + 1,
+      };
+    })
+  );
+
+  // Verify solvability
+  const { visitedNodesInOrder } = bfs(
+    newGrid,
+    newGrid[15][10],
+    newGrid[15][40]
+  );
+  if (!visitedNodesInOrder.some((node) => node.isEnd)) {
+    // Fall back to wall-based random scatter (matching generateRandomScatter)
+    console.log(
+      `Weight scatter maze not solvable, falling back to random scatter`
+    );
+    newGrid = newGrid.map((row, rowIndex) =>
+      row.map((node, colIndex) => {
+        const isInner =
+          rowIndex > 0 &&
+          rowIndex < ROWS - 1 &&
+          colIndex > 0 &&
+          colIndex < COLS - 1;
+        return {
+          ...node,
+          isWall:
+            node.isStart || node.isEnd ? false : isInner && Math.random() < 0.2,
+          weight: node.isStart || node.isEnd ? 1 : 1, // Reset weights
+          animationKey: isInner ? node.animationKey + 1 : node.animationKey,
+        };
+      })
+    );
+  }
+
+  setGrid(newGrid);
+};
+
 export const generateMaze = async (skew, grid, setGrid, bfs) => {
   const ROWS = grid.length;
   const COLS = grid[0].length;
 
+  // Initialize grid
   let newGrid = grid.map((row) =>
     row.map((node) => ({
       ...node,
@@ -65,12 +125,19 @@ export const generateMaze = async (skew, grid, setGrid, bfs) => {
     }))
   );
 
+  // Flag to determine if we're generating a weight-based maze
+  const isWeightMaze = skew === "weight-recursive";
+
   // 1. Top border: Left to right
   for (let col = 0; col < COLS; col += 6) {
     newGrid = newGrid.map((r) => r.map((n) => ({ ...n })));
     for (let i = col; i < Math.min(col + 6, COLS); i++) {
       if (!newGrid[0][i].isStart && !newGrid[0][i].isEnd) {
-        newGrid[0][i].isWall = true;
+        if (isWeightMaze) {
+          newGrid[0][i].weight = 2;
+        } else {
+          newGrid[0][i].isWall = true;
+        }
         newGrid[0][i].animationKey += 1;
       }
     }
@@ -83,11 +150,19 @@ export const generateMaze = async (skew, grid, setGrid, bfs) => {
     newGrid = newGrid.map((r) => r.map((n) => ({ ...n })));
     for (let r = row; r < Math.min(row + 4, ROWS - 1); r++) {
       if (!newGrid[r][0].isStart && !newGrid[r][0].isEnd) {
-        newGrid[r][0].isWall = true;
+        if (isWeightMaze) {
+          newGrid[r][0].weight = 2;
+        } else {
+          newGrid[r][0].isWall = true;
+        }
         newGrid[r][0].animationKey += 1;
       }
       if (!newGrid[r][COLS - 1].isStart && !newGrid[r][COLS - 1].isEnd) {
-        newGrid[r][COLS - 1].isWall = true;
+        if (isWeightMaze) {
+          newGrid[r][COLS - 1].weight = 2;
+        } else {
+          newGrid[r][COLS - 1].isWall = true;
+        }
         newGrid[r][COLS - 1].animationKey += 1;
       }
     }
@@ -107,7 +182,11 @@ export const generateMaze = async (skew, grid, setGrid, bfs) => {
         !newGrid[ROWS - 1][leftCol].isStart &&
         !newGrid[ROWS - 1][leftCol].isEnd
       ) {
-        newGrid[ROWS - 1][leftCol].isWall = true;
+        if (isWeightMaze) {
+          newGrid[ROWS - 1][leftCol].weight = 2;
+        } else {
+          newGrid[ROWS - 1][leftCol].isWall = true;
+        }
         newGrid[ROWS - 1][leftCol].animationKey += 1;
       }
       if (
@@ -115,7 +194,11 @@ export const generateMaze = async (skew, grid, setGrid, bfs) => {
         !newGrid[ROWS - 1][rightCol].isStart &&
         !newGrid[ROWS - 1][rightCol].isEnd
       ) {
-        newGrid[ROWS - 1][rightCol].isWall = true;
+        if (isWeightMaze) {
+          newGrid[ROWS - 1][rightCol].weight = 2;
+        } else {
+          newGrid[ROWS - 1][rightCol].isWall = true;
+        }
         newGrid[ROWS - 1][rightCol].animationKey += 1;
       }
     }
@@ -163,6 +246,8 @@ export const generateMaze = async (skew, grid, setGrid, bfs) => {
       horizontal = Math.random() < 0.48; // 48% chance of horizontal wall
     } else if (skew === "horizontal") {
       horizontal = Math.random() < 0.52; // 52% chance of horizontal wall
+    } else if (skew === "weight-recursive") {
+      horizontal = width < height; // Same as "none" (unskewed)
     }
 
     if (horizontal) {
@@ -182,23 +267,26 @@ export const generateMaze = async (skew, grid, setGrid, bfs) => {
       const gapCol =
         possibleGapCols[Math.floor(Math.random() * possibleGapCols.length)];
 
-      const wallUpdates = [];
+      const updates = [];
       for (let col = colStart; col <= colEnd; col++) {
         if (
           col !== gapCol &&
           !newGrid[wallRow][col].isStart &&
           !newGrid[wallRow][col].isEnd
         ) {
-          wallUpdates.push([wallRow, col]);
+          updates.push([wallRow, col]);
         }
       }
 
-      for (let i = 0; i < wallUpdates.length; i += 4) {
+      for (let i = 0; i < updates.length; i += 4) {
         newGrid = newGrid.map((r) => r.map((n) => ({ ...n })));
-        for (let j = i; j < Math.min(i + 4, wallUpdates.length); j++) {
-          const [row, col] = wallUpdates[j];
-          newGrid[row][col].isWall = true;
-          newGrid[row][col].weight = 1;
+        for (let j = i; j < Math.min(i + 4, updates.length); j++) {
+          const [row, col] = updates[j];
+          if (isWeightMaze) {
+            newGrid[row][col].weight = 2;
+          } else {
+            newGrid[row][col].isWall = true;
+          }
           newGrid[row][col].animationKey += 1;
         }
         setGrid(newGrid);
@@ -224,23 +312,26 @@ export const generateMaze = async (skew, grid, setGrid, bfs) => {
       const gapRow =
         possibleGapRows[Math.floor(Math.random() * possibleGapRows.length)];
 
-      const wallUpdates = [];
+      const updates = [];
       for (let row = rowStart; row <= rowEnd; row++) {
         if (
           row !== gapRow &&
           !newGrid[row][wallCol].isStart &&
           !newGrid[row][wallCol].isEnd
         ) {
-          wallUpdates.push([row, wallCol]);
+          updates.push([row, wallCol]);
         }
       }
 
-      for (let i = 0; i < wallUpdates.length; i += 4) {
+      for (let i = 0; i < updates.length; i += 4) {
         newGrid = newGrid.map((r) => r.map((n) => ({ ...n })));
-        for (let j = i; j < Math.min(i + 4, wallUpdates.length); j++) {
-          const [row, col] = wallUpdates[j];
-          newGrid[row][col].isWall = true;
-          newGrid[row][col].weight = 1;
+        for (let j = i; j < Math.min(i + 4, updates.length); j++) {
+          const [row, col] = updates[j];
+          if (isWeightMaze) {
+            newGrid[row][col].weight = 2;
+          } else {
+            newGrid[row][col].isWall = true;
+          }
           newGrid[row][col].animationKey += 1;
         }
         setGrid(newGrid);
@@ -274,10 +365,12 @@ export const generateMaze = async (skew, grid, setGrid, bfs) => {
               colIndex === COLS - 1
             ? true
             : Math.random() < 0.2,
-        weight: node.isStart || node.isEnd ? 1 : 1,
+        weight: node.isStart || node.isEnd ? 1 : isWeightMaze ? 1 : node.weight,
         animationKey: node.animationKey + 1,
       }))
     );
+    setGrid(newGrid);
+  } else {
     setGrid(newGrid);
   }
 };

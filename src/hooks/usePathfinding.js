@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { runAlgorithm, bfs } from "../utils/algorithms";
-import { generateMaze, generateRandomScatter } from "../utils/maze";
+import {
+  generateMaze,
+  generateRandomScatter,
+  generateWeightRandomScatter,
+} from "../utils/maze";
 
 const ROWS = 31;
 const COLS = 51;
@@ -212,11 +216,11 @@ export const usePathfinding = () => {
     // Calculate metrics but don't set them yet
     const visitedCount = filteredVisitedNodes.length;
 
-    // Reset grid for animation
+    // Reset grid for animation, preserving walls and weights
     setGrid(
       grid.map((row) =>
         row.map((node) => {
-          if (node.isWall) return node;
+          if (node.isWall || node.weight > 1) return node;
           return {
             ...node,
             isVisited: false,
@@ -362,6 +366,8 @@ export const usePathfinding = () => {
     setTotalCost(0);
     if (mazeType === "random-scatter") {
       await generateRandomScatter(grid, setGrid, bfs);
+    } else if (mazeType === "weight-random-scatter") {
+      await generateWeightRandomScatter(grid, setGrid, bfs);
     } else {
       await generateMaze(mazeType, grid, setGrid, bfs);
     }

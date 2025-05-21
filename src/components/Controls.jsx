@@ -120,6 +120,15 @@ function Controls({
         <option value="random-scatter" className="bg-gray-700 text-white">
           Random Scatter
         </option>
+        <option value="weight-recursive" className="bg-gray-700 text-white">
+          Weight Recursive
+        </option>
+        <option
+          value="weight-random-scatter"
+          className="bg-gray-700 text-white"
+        >
+          Weight Scatter
+        </option>
       </select>
       <button
         className={`px-3 py-1 text-sm font-semibold rounded-lg transition-colors text-white flex-shrink-0 ${
@@ -149,9 +158,9 @@ function Controls({
         <Weight size={16} />
       </button>
       <button
-        className={`px-3 py-1 text-sm font-semibold transition-colors cursor-pointer flex-shrink-0 ${
+        className={`px-3 py-1 text-sm font-semibold transition-colors flex-shrink-0 ${
           isRunning
-            ? "opacity-50 cursor-not-allowed text-white"
+            ? "opacity-50 cursor-not-allowed text-white "
             : mode === "eraser"
             ? "text-sky-400 hover:text-sky-600 cursor-pointer"
             : "text-white hover:text-sky-400 cursor-pointer"
