@@ -1,6 +1,12 @@
 import { CircleArrowRight, Target, Weight } from "lucide-react";
 
-export default function Node({ node, onMouseDown, onMouseEnter, onMouseUp }) {
+export default function Node({
+  node,
+  onMouseDown,
+  onMouseEnter,
+  onMouseUp,
+  isDraggingUpdate,
+}) {
   const {
     row,
     col,
@@ -29,7 +35,9 @@ export default function Node({ node, onMouseDown, onMouseEnter, onMouseUp }) {
   const cursor = isStart || isEnd ? "cursor-grab" : "cursor-default";
   const borderClass =
     isWall || isPath ? "" : "border-r border-b border-blue-300";
-  const animationClass = isPath
+  const animationClass = isDraggingUpdate
+    ? "" // Skip animations during dragging updates
+    : isPath
     ? "animate-pop-in"
     : isCurrent
     ? "animate-pulse"

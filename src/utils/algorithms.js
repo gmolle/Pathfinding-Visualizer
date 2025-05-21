@@ -1,5 +1,3 @@
-// ../utils/algorithms.js
-
 // Heuristic for A* and Greedy Best-First
 const heuristic = (node1, node2) =>
   Math.abs(node1.row - node2.row) + Math.abs(node1.col - node2.col);
@@ -221,6 +219,7 @@ export const runAlgorithmNoAnimation = (
       isVisited: false,
       isPath: false,
       isCurrent: false,
+      animationKey: 0, // Reset to prevent animations
       distance: Infinity,
       fScore: Infinity,
       hScore: Infinity,
@@ -260,19 +259,23 @@ export const runAlgorithmNoAnimation = (
   }
   shortestPath.reverse();
 
-  // Update grid with visited and path nodes
+  // Update grid with visited and path nodes, excluding start and end
   visitedNodesInOrder.forEach((node) => {
     if (!node.isStart && !node.isEnd) {
       computedGrid[node.row][node.col].isVisited = true;
-      computedGrid[node.row][node.col].animationKey += 1;
+      // Do not increment animationKey
     }
   });
   shortestPath.forEach((node) => {
     if (!node.isStart && !node.isEnd) {
       computedGrid[node.row][node.col].isPath = true;
-      computedGrid[node.row][node.col].animationKey += 1;
+      // Do not increment animationKey
     }
   });
+
+  // Explicitly ensure start and end nodes are not marked as visited
+  computedGrid[startNode.row][startNode.col].isVisited = false;
+  computedGrid[endNode.row][endNode.col].isVisited = false;
 
   return {
     visitedNodesInOrder,

@@ -1,6 +1,12 @@
 import Node from "./Node";
 
-export default function Grid({ grid, onMouseDown, onMouseEnter, onMouseUp }) {
+export default function Grid({
+  grid,
+  onMouseDown,
+  onMouseEnter,
+  onMouseUp,
+  isDraggingUpdate,
+}) {
   return (
     <div className="w-full h-[74vh] overflow-hidden border-t border-l border-blue-300 ">
       <div
@@ -18,6 +24,7 @@ export default function Grid({ grid, onMouseDown, onMouseEnter, onMouseUp }) {
                 onMouseDown={onMouseDown}
                 onMouseEnter={onMouseEnter}
                 onMouseUp={onMouseUp}
+                isDraggingUpdate={isDraggingUpdate}
               />
             ))}
           </div>

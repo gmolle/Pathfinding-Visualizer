@@ -17,6 +17,7 @@ function App() {
     visitedNodes,
     pathLength,
     totalCost,
+    isDraggingUpdate,
     resetGrid,
     toggleWeightMode,
     toggleEraserMode,
@@ -62,6 +63,7 @@ function App() {
             onMouseDown={handleMouseDown}
             onMouseEnter={handleMouseEnter}
             onMouseUp={handleMouseUp}
+            isDraggingUpdate={isDraggingUpdate}
           />
         </div>
       </div>

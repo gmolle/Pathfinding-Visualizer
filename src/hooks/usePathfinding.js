@@ -55,7 +55,8 @@ export const usePathfinding = () => {
   const [visitedNodes, setVisitedNodes] = useState(0);
   const [pathLength, setPathLength] = useState(0);
   const [totalCost, setTotalCost] = useState(0);
-  const [hasPathfindingResult, setHasPathfindingResult] = useState(false); // Track if pathfinding has run
+  const [hasPathfindingResult, setHasPathfindingResult] = useState(false);
+  const [isDraggingUpdate, setIsDraggingUpdate] = useState(false);
 
   // Timer logic
   useEffect(() => {
@@ -79,6 +80,7 @@ export const usePathfinding = () => {
     setPathLength(0);
     setTotalCost(0);
     setHasPathfindingResult(false);
+    setIsDraggingUpdate(false);
   };
 
   // Toggle weight mode
@@ -142,20 +144,27 @@ export const usePathfinding = () => {
     ) {
       newGrid.forEach((r) => r.forEach((n) => (n.isStart = false)));
       node.isStart = true;
+      node.isVisited = false; // Ensure start node stays white
       node.weight = 1;
       node.isWall = false;
       if (hasPathfindingResult) {
         const startNode = newGrid[row][col];
         const endNode = newGrid.flat().find((n) => n.isEnd);
         if (startNode && endNode) {
+          setIsDraggingUpdate(true); // Mark as dragging update
           const {
             visitedNodesInOrder,
             newGrid: updatedGrid,
             shortestPath,
             totalCost,
           } = runAlgorithmNoAnimation(algorithm, newGrid, startNode, endNode);
+          // Ensure start and end nodes are not marked as visited
+          updatedGrid[startNode.row][startNode.col].isVisited = false;
+          updatedGrid[endNode.row][endNode.col].isVisited = false;
           setGrid(updatedGrid);
-          setVisitedNodes(visitedNodesInOrder.filter((n) => !n.isStart).length);
+          setVisitedNodes(
+            visitedNodesInOrder.filter((n) => !n.isStart && !n.isEnd).length
+          );
           setPathLength(shortestPath.length > 0 ? shortestPath.length - 1 : 0);
           setTotalCost(totalCost);
         }
@@ -170,20 +179,27 @@ export const usePathfinding = () => {
     ) {
       newGrid.forEach((r) => r.forEach((n) => (n.isEnd = false)));
       node.isEnd = true;
+      node.isVisited = false; // Ensure end node stays white
       node.weight = 1;
       node.isWall = false;
       if (hasPathfindingResult) {
         const startNode = newGrid.flat().find((n) => n.isStart);
         const endNode = newGrid[row][col];
         if (startNode && endNode) {
+          setIsDraggingUpdate(true); // Mark as dragging update
           const {
             visitedNodesInOrder,
             newGrid: updatedGrid,
             shortestPath,
             totalCost,
           } = runAlgorithmNoAnimation(algorithm, newGrid, startNode, endNode);
+          // Ensure start and end nodes are not marked as visited
+          updatedGrid[startNode.row][startNode.col].isVisited = false;
+          updatedGrid[endNode.row][endNode.col].isVisited = false;
           setGrid(updatedGrid);
-          setVisitedNodes(visitedNodesInOrder.filter((n) => !n.isStart).length);
+          setVisitedNodes(
+            visitedNodesInOrder.filter((n) => !n.isStart && !n.isEnd).length
+          );
           setPathLength(shortestPath.length > 0 ? shortestPath.length - 1 : 0);
           setTotalCost(totalCost);
         }
@@ -222,6 +238,7 @@ export const usePathfinding = () => {
   const handleMouseUp = () => {
     setMouseIsPressed(false);
     setDragging(null);
+    // Do not reset isDraggingUpdate here
   };
 
   // Run algorithm with animations
@@ -233,6 +250,7 @@ export const usePathfinding = () => {
     setVisitedNodes(0);
     setPathLength(0);
     setTotalCost(0);
+    setIsDraggingUpdate(false); // Reset for visualization
     const startNode = grid.flat().find((node) => node.isStart);
     const endNode = grid.flat().find((node) => node.isEnd);
     if (!startNode || !endNode) {
@@ -248,9 +266,9 @@ export const usePathfinding = () => {
       endNode
     );
 
-    // Filter out start node from visitedNodesInOrder to avoid animating it
+    // Filter out start and end nodes from visitedNodesInOrder to avoid animating them
     const filteredVisitedNodes = visitedNodesInOrder.filter(
-      (node) => !node.isStart
+      (node) => !node.isStart && !node.isEnd
     );
 
     // Calculate metrics but don't set them yet
@@ -392,7 +410,7 @@ export const usePathfinding = () => {
       setTotalCost(cost);
       setIsRunning(false);
       setIsTimerRunning(false);
-      setHasPathfindingResult(true);
+      setHasPathfindingResult(true); // Enable instant updates
     }, (endNodeFound ? visitedSleep * (endNodeBatchIndex + 1) : visitedSleep * Math.ceil(filteredVisitedNodes.length / visitedBatchSize)) + pathSleep * Math.ceil(shortestPath.length / pathBatchSize));
   };
 
@@ -406,6 +424,7 @@ export const usePathfinding = () => {
     setPathLength(0);
     setTotalCost(0);
     setHasPathfindingResult(false);
+    setIsDraggingUpdate(false);
     if (mazeType === "random-scatter") {
       await generateRandomScatter(grid, setGrid, bfs);
     } else if (mazeType === "weight-random-scatter") {
@@ -427,6 +446,7 @@ export const usePathfinding = () => {
     visitedNodes,
     pathLength,
     totalCost,
+    isDraggingUpdate,
     resetGrid,
     toggleWeightMode,
     toggleEraserMode,
