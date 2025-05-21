@@ -94,7 +94,7 @@ export default function Controls({
         disabled={isRunning}
       >
         <option value="" className="bg-gray-700 text-white">
-          Pattern
+          Select Pattern
         </option>
         <option value="none" className="bg-gray-700 text-white">
           Recursive

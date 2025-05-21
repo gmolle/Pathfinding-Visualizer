@@ -24,7 +24,7 @@ export default function Navbar({
   };
 
   return (
-    <nav className="w-full bg-gray-800 py-6 px-4 shadow-md">
+    <nav className="w-full bg-gray-800 py-4 px-4 shadow-md">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between w-full gap-4">
         <div className="flex items-center justify-between w-full lg:w-auto">
           <h1 className="text-2xl font-bold text-white text-center lg:text-left">
