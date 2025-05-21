@@ -25,9 +25,9 @@ export default function Controls({
   };
 
   return (
-    <div className="flex flex-col md:flex-row md:flex-wrap items-center justify-center gap-4 w-full max-w-7xl">
+    <div className="flex flex-col md:flex-row md:flex-wrap xl:flex-nowrap items-center justify-center gap-2 w-full">
       <select
-        className={`text-white px-3 py-2 rounded transition-colors focus-visible:outline-none ${
+        className={`text-white px-2 py-1 text-sm rounded transition-colors focus-visible:outline-none flex-shrink-0 ${
           isRunning
             ? "opacity-50 cursor-not-allowed"
             : "hover:text-sky-400 cursor-pointer"
@@ -37,17 +37,17 @@ export default function Controls({
         disabled={isRunning}
       >
         <option value="dijkstra" className="bg-gray-700 text-white">
-          Dijkstra's Algorithm
+          Dijkstra's
         </option>
         <option value="astar" className="bg-gray-700 text-white">
           A* Search
         </option>
         <option value="bfs" className="bg-gray-700 text-white">
-          Breadth-First Search
+          BFS
         </option>
       </select>
       <button
-        className={`px-4 py-2 font-semibold rounded-lg transition-colors ${
+        className={`px-3 py-1 text-sm font-semibold rounded-lg transition-colors flex-shrink-0 ${
           isRunning
             ? "bg-gray-600 text-white cursor-not-allowed opacity-50"
             : "bg-sky-400 hover:bg-sky-600 text-white cursor-pointer"
@@ -57,30 +57,34 @@ export default function Controls({
       >
         Visualize
       </button>
-      <div className="flex items-center gap-2 relative text-white px-3 py-2">
-        <label htmlFor="speed" className={isRunning ? "opacity-50" : ""}>
-          Speed:
-        </label>
-        <input
-          id="speed"
-          type="range"
-          min="5"
-          max="200"
-          value={speed}
-          onChange={(e) => !isRunning && setSpeed(Number(e.target.value))}
-          className={`w-22 cursor-grab accent-sky-400 ${
-            isRunning ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-          disabled={isRunning}
-        />
-        <span
-          className={`absolute -top-3 right-3 ${isRunning ? "opacity-50" : ""}`}
-        >
-          {speed}ms
-        </span>
+      <div className="relative flex-shrink-0 px-2 py-3">
+        <div className="flex items-center gap-1 text-white text-sm">
+          <label htmlFor="speed" className={isRunning ? "opacity-50" : ""}>
+            Speed:
+          </label>
+          <input
+            id="speed"
+            type="range"
+            min="5"
+            max="200"
+            value={speed}
+            onChange={(e) => !isRunning && setSpeed(Number(e.target.value))}
+            className={`w-16 cursor-grab accent-sky-400 ${
+              isRunning ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={isRunning}
+          />
+          <span
+            className={`absolute -top-1 right-2 text-xs ${
+              isRunning ? "opacity-50" : ""
+            }`}
+          >
+            {speed}ms
+          </span>
+        </div>
       </div>
       <select
-        className={`text-white px-3 py-2 rounded transition-colors focus-visible:outline-none ${
+        className={`text-white px-2 py-1 text-sm rounded transition-colors focus-visible:outline-none flex-shrink-0 ${
           isRunning
             ? "opacity-50 cursor-not-allowed"
             : "hover:text-sky-400 cursor-pointer"
@@ -90,25 +94,25 @@ export default function Controls({
         disabled={isRunning}
       >
         <option value="" className="bg-gray-700 text-white">
-          Select Pattern
+          Pattern
         </option>
         <option value="none" className="bg-gray-700 text-white">
-          Recursive Maze
+          Recursive
         </option>
         <option value="horizontal" className="bg-gray-700 text-white">
-          Horizontal Skew
+          Horizontal
         </option>
         <option value="vertical" className="bg-gray-700 text-white">
-          Vertical Skew
+          Vertical
         </option>
         <option value="random-scatter" className="bg-gray-700 text-white">
-          Random Scatter
+          Scatter
         </option>
       </select>
       <button
-        className={`px-4 py-2 font-semibold rounded-lg transition-colors text-white ${
+        className={`px-3 py-1 text-sm font-semibold rounded-lg transition-colors text-white flex-shrink-0 ${
           mazeType === ""
-            ? "bg-gray-600 text-white cursor-not-allowed opacity-50"
+            ? "bg-gray-600 cursor-not-allowed opacity-50"
             : isRunning
             ? "bg-indigo-600 opacity-50 cursor-not-allowed"
             : "bg-indigo-600 hover:bg-indigo-700 cursor-pointer"
@@ -119,7 +123,7 @@ export default function Controls({
         Generate
       </button>
       <button
-        className={`flex items-center gap-2 px-4 py-2 font-semibold transition-colors ${
+        className={`flex items-center gap-1 px-3 py-1 text-sm font-semibold transition-colors flex-shrink-0 ${
           isRunning || algorithm === "bfs"
             ? "opacity-50 cursor-not-allowed text-white"
             : mode === "weight"
@@ -129,11 +133,11 @@ export default function Controls({
         onClick={toggleWeightMode}
         disabled={isRunning || algorithm === "bfs"}
       >
-        {mode === "weight" ? "Weight Mode: ON" : "Weight Mode: OFF"}
-        <Weight size={20} />
+        {mode === "weight" ? "Weight: ON" : "Weight: OFF"}
+        <Weight size={16} />
       </button>
       <button
-        className={`px-4 py-2 font-semibold transition-colors cursor-pointer ${
+        className={`px-3 py-1 text-sm font-semibold transition-colors cursor-pointer flex-shrink-0 ${
           isRunning
             ? "opacity-50 cursor-not-allowed text-white"
             : mode === "eraser"
@@ -146,15 +150,15 @@ export default function Controls({
         {mode === "eraser" ? "Eraser: ON" : "Eraser: OFF"}
       </button>
       <button
-        className={`px-4 py-2 text-white font-semibold transition-colors ${
+        className={`px-3 py-1 text-sm font-semibold transition-colors flex-shrink-0 ${
           isRunning
-            ? "opacity-50 cursor-not-allowed"
-            : "cursor-pointer hover:text-sky-400"
+            ? "opacity-50 cursor-not-allowed text-white"
+            : "cursor-pointer hover:text-sky-400 text-white"
         }`}
         onClick={resetGrid}
         disabled={isRunning}
       >
-        Reset Grid
+        Reset
       </button>
     </div>
   );
