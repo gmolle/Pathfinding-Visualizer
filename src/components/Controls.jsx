@@ -97,16 +97,16 @@ export default function Controls({
           Select Pattern
         </option>
         <option value="none" className="bg-gray-700 text-white">
-          Recursive
+          Recursive Divison
         </option>
         <option value="horizontal" className="bg-gray-700 text-white">
-          Horizontal
+          Horizontal Skew
         </option>
         <option value="vertical" className="bg-gray-700 text-white">
-          Vertical
+          Vertical Skew
         </option>
         <option value="random-scatter" className="bg-gray-700 text-white">
-          Scatter
+          Random Scatter
         </option>
       </select>
       <button
@@ -133,7 +133,7 @@ export default function Controls({
         onClick={toggleWeightMode}
         disabled={isRunning || algorithm === "bfs"}
       >
-        {mode === "weight" ? "Weight: ON" : "Weight: OFF"}
+        {mode === "weight" ? "Weight Mode: ON" : "Weight Mode: OFF"}
         <Weight size={16} />
       </button>
       <button
