@@ -13,6 +13,10 @@ function App() {
     speed,
     mazeType,
     isRunning,
+    timer,
+    visitedNodes,
+    pathLength,
+    totalCost,
     resetGrid,
     toggleWeightMode,
     toggleEraserMode,
@@ -43,10 +47,16 @@ function App() {
         generatePathfindingMaze={generatePathfindingMaze}
         resetGrid={resetGrid}
       />
-      <div className="">
+      <div className="flex flex-col items-center">
         <Legend />
-        <AlgorithmDescription algorithm={algorithm} />
-        <div className="p-8 pt-0">
+        <AlgorithmDescription
+          algorithm={algorithm}
+          timer={timer}
+          visitedNodes={visitedNodes}
+          pathLength={pathLength}
+          totalCost={totalCost}
+        />
+        <div className="p-8 pt-4 pb-0 w-full">
           <Grid
             grid={grid}
             onMouseDown={handleMouseDown}

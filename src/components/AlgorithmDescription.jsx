@@ -1,4 +1,12 @@
-export default function AlgorithmDescription({ algorithm }) {
+import Metrics from "./Metrics";
+
+export default function AlgorithmDescription({
+  algorithm,
+  timer,
+  visitedNodes,
+  pathLength,
+  totalCost,
+}) {
   const algorithms = {
     dijkstra: {
       name: "Dijkstra’s Algorithm",
@@ -20,8 +28,8 @@ export default function AlgorithmDescription({ algorithm }) {
   const algo = algorithms[algorithm] || null;
 
   return (
-    <div className="text-center max-w-4xl mx-auto mb-4 px-4 text-gray-700">
-      <p>
+    <div className="text-center px-4 text-gray-700">
+      <p className="mb-2">
         {algo ? (
           <>
             {algo.name} is a{" "}
@@ -38,6 +46,12 @@ export default function AlgorithmDescription({ algorithm }) {
           "Select an algorithm to see its description."
         )}
       </p>
+      <Metrics
+        timer={timer}
+        visitedNodes={visitedNodes}
+        pathLength={pathLength}
+        totalCost={totalCost}
+      />
     </div>
   );
 }
