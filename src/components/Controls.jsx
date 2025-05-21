@@ -20,7 +20,10 @@ function Controls({
     if (isRunning) return;
     const newAlgorithm = e.target.value;
     if (
-      (newAlgorithm === "bfs" || newAlgorithm === "greedy") &&
+      (newAlgorithm === "bfs" ||
+        newAlgorithm === "greedy" ||
+        newAlgorithm === "dfs" ||
+        newAlgorithm === "bidirectionalBFS") &&
       mode === "weight"
     ) {
       toggleWeightMode();
@@ -59,6 +62,9 @@ function Controls({
         </option>
         <option value="dfs" className="bg-gray-700 text-white">
           Depth-First Search
+        </option>
+        <option value="bidirectionalBFS" className="bg-gray-700 text-white">
+          Bidirectional BFS
         </option>
       </select>
       <button
@@ -151,7 +157,8 @@ function Controls({
           isRunning ||
           algorithm === "bfs" ||
           algorithm === "greedy" ||
-          algorithm === "dfs"
+          algorithm === "dfs" ||
+          algorithm === "bidirectionalBFS"
             ? "opacity-50 cursor-not-allowed text-white"
             : mode === "weight"
             ? "text-sky-400 hover:text-sky-600 cursor-pointer"
@@ -162,7 +169,8 @@ function Controls({
           isRunning ||
           algorithm === "bfs" ||
           algorithm === "greedy" ||
-          algorithm === "dfs"
+          algorithm === "dfs" ||
+          algorithm === "bidirectionalBFS"
         }
       >
         {mode === "weight" ? "Weight Mode: ON" : "Weight Mode: OFF"}

@@ -144,29 +144,27 @@ export const usePathfinding = () => {
     ) {
       newGrid.forEach((r) => r.forEach((n) => (n.isStart = false)));
       node.isStart = true;
-      node.isVisited = false; // Ensure start node stays white
+      node.isVisited = false;
       node.weight = 1;
       node.isWall = false;
       if (hasPathfindingResult) {
         const startNode = newGrid[row][col];
         const endNode = newGrid.flat().find((n) => n.isEnd);
         if (startNode && endNode) {
-          setIsDraggingUpdate(true); // Prevent animations
+          setIsDraggingUpdate(true);
           const {
             visitedNodesInOrder,
             newGrid: updatedGrid,
             shortestPath,
             totalCost,
           } = runAlgorithmNoAnimation(algorithm, newGrid, startNode, endNode);
-          // Ensure start and end nodes are not marked as visited
           updatedGrid[startNode.row][startNode.col].isVisited = false;
           updatedGrid[endNode.row][endNode.col].isVisited = false;
-          // Calculate hypothetical animation duration
           const visitedBatchSize = 6;
           const pathBatchSize = 1;
           const visitedSleep = speed;
           const pathSleep = 50;
-          const filteredVisitedNodes = visitedNodesInOrder.filter(
+          const filteredVisitedNodes = (visitedNodesInOrder || []).filter(
             (n) => !n.isStart && !n.isEnd
           );
           let endNodeFound = false;
@@ -182,13 +180,16 @@ export const usePathfinding = () => {
               ? visitedSleep * (endNodeBatchIndex + 1)
               : visitedSleep *
                 Math.ceil(filteredVisitedNodes.length / visitedBatchSize)) +
-            pathSleep * Math.ceil(shortestPath.length / pathBatchSize);
-          // Update state
+            pathSleep * Math.ceil((shortestPath || []).length / pathBatchSize);
           setGrid(updatedGrid);
           setVisitedNodes(filteredVisitedNodes.length);
-          setPathLength(shortestPath.length > 0 ? shortestPath.length - 1 : 0);
-          setTotalCost(totalCost);
-          setTimer(animationDuration); // Set timer to animation duration
+          setPathLength(
+            shortestPath && shortestPath.length > 0
+              ? shortestPath.length - 1
+              : 0
+          );
+          setTotalCost(totalCost || 0);
+          setTimer(animationDuration);
         }
       } else {
         setGrid(newGrid);
@@ -201,29 +202,27 @@ export const usePathfinding = () => {
     ) {
       newGrid.forEach((r) => r.forEach((n) => (n.isEnd = false)));
       node.isEnd = true;
-      node.isVisited = false; // Ensure end node stays white
+      node.isVisited = false;
       node.weight = 1;
       node.isWall = false;
       if (hasPathfindingResult) {
         const startNode = newGrid.flat().find((n) => n.isStart);
         const endNode = newGrid[row][col];
         if (startNode && endNode) {
-          setIsDraggingUpdate(true); // Prevent animations
+          setIsDraggingUpdate(true);
           const {
             visitedNodesInOrder,
             newGrid: updatedGrid,
             shortestPath,
             totalCost,
           } = runAlgorithmNoAnimation(algorithm, newGrid, startNode, endNode);
-          // Ensure start and end nodes are not marked as visited
           updatedGrid[startNode.row][startNode.col].isVisited = false;
           updatedGrid[endNode.row][endNode.col].isVisited = false;
-          // Calculate hypothetical animation duration
           const visitedBatchSize = 6;
           const pathBatchSize = 1;
           const visitedSleep = speed;
           const pathSleep = 50;
-          const filteredVisitedNodes = visitedNodesInOrder.filter(
+          const filteredVisitedNodes = (visitedNodesInOrder || []).filter(
             (n) => !n.isStart && !n.isEnd
           );
           let endNodeFound = false;
@@ -239,13 +238,16 @@ export const usePathfinding = () => {
               ? visitedSleep * (endNodeBatchIndex + 1)
               : visitedSleep *
                 Math.ceil(filteredVisitedNodes.length / visitedBatchSize)) +
-            pathSleep * Math.ceil(shortestPath.length / pathBatchSize);
-          // Update state
+            pathSleep * Math.ceil((shortestPath || []).length / pathBatchSize);
           setGrid(updatedGrid);
           setVisitedNodes(filteredVisitedNodes.length);
-          setPathLength(shortestPath.length > 0 ? shortestPath.length - 1 : 0);
-          setTotalCost(totalCost);
-          setTimer(animationDuration); // Set timer to animation duration
+          setPathLength(
+            shortestPath && shortestPath.length > 0
+              ? shortestPath.length - 1
+              : 0
+          );
+          setTotalCost(totalCost || 0);
+          setTimer(animationDuration);
         }
       } else {
         setGrid(newGrid);
@@ -282,7 +284,6 @@ export const usePathfinding = () => {
   const handleMouseUp = () => {
     setMouseIsPressed(false);
     setDragging(null);
-    // Do not reset isDraggingUpdate
   };
 
   // Run algorithm with animations
@@ -294,7 +295,7 @@ export const usePathfinding = () => {
     setVisitedNodes(0);
     setPathLength(0);
     setTotalCost(0);
-    setIsDraggingUpdate(false); // Reset for visualization
+    setIsDraggingUpdate(false);
     const startNode = grid.flat().find((node) => node.isStart);
     const endNode = grid.flat().find((node) => node.isEnd);
     if (!startNode || !endNode) {
@@ -303,19 +304,38 @@ export const usePathfinding = () => {
       return;
     }
 
-    const { visitedNodesInOrder, newGrid } = runAlgorithm(
-      algorithm,
-      grid,
-      startNode,
-      endNode
-    );
+    const { visitedNodesInOrder, newGrid, shortestPath, totalCost } =
+      runAlgorithm(algorithm, grid, startNode, endNode);
 
-    // Filter out start and end nodes from visitedNodesInOrder to avoid animating them
+    // Handle invalid algorithm output
+    if (!visitedNodesInOrder || !Array.isArray(visitedNodesInOrder)) {
+      console.error(
+        `Invalid visitedNodesInOrder for algorithm: ${algorithm}`,
+        visitedNodesInOrder
+      );
+      setGrid(
+        grid.map((row) =>
+          row.map((node) => ({
+            ...node,
+            isVisited: false,
+            isPath: false,
+            isCurrent: false,
+            animationKey: 0,
+          }))
+        )
+      );
+      setIsRunning(false);
+      setIsTimerRunning(false);
+      setHasPathfindingResult(false);
+      return;
+    }
+
+    // Filter out start and end nodes
     const filteredVisitedNodes = visitedNodesInOrder.filter(
       (node) => !node.isStart && !node.isEnd
     );
 
-    // Calculate metrics but don't set them yet
+    // Calculate metrics
     const visitedCount = filteredVisitedNodes.length;
 
     // Reset grid for animation, preserving walls and weights
@@ -351,27 +371,10 @@ export const usePathfinding = () => {
       );
     };
 
-    // Trace shortest path and calculate total cost
-    const shortestPath = [];
-    let currentNode = newGrid[endNode.row][endNode.col];
-    let cost = 0;
-    while (currentNode && currentNode.previousNode) {
-      shortestPath.push(currentNode);
-      cost += currentNode.weight;
-      currentNode = currentNode.previousNode;
-    }
-    // Include start node in shortestPath and cost
-    if (currentNode && currentNode.isStart) {
-      shortestPath.push(currentNode);
-      cost += currentNode.weight;
-    }
-    shortestPath.reverse();
-    const pathLen = shortestPath.length > 0 ? shortestPath.length - 1 : 0; // Number of edges
-
+    // Animate visited nodes
     let endNodeFound = false;
     let endNodeBatchIndex = -1;
 
-    // Animate visited nodes in batches
     for (let i = 0; i < filteredVisitedNodes.length; i += visitedBatchSize) {
       setTimeout(() => {
         setGrid((prevGrid) => {
@@ -411,7 +414,7 @@ export const usePathfinding = () => {
       }, visitedSleep * Math.floor(i / visitedBatchSize));
     }
 
-    // Clear any remaining isCurrent after visited nodes
+    // Clear isCurrent
     setTimeout(() => {
       setGrid((prevGrid) => {
         const updatedGrid = prevGrid.map((r) =>
@@ -424,8 +427,12 @@ export const usePathfinding = () => {
       });
     }, visitedSleep * Math.ceil(filteredVisitedNodes.length / visitedBatchSize));
 
-    // Animate shortest path in batches
-    if (shortestPath.length > 0) {
+    // Animate shortest path
+    if (
+      shortestPath &&
+      Array.isArray(shortestPath) &&
+      shortestPath.length > 0
+    ) {
       for (let i = 0; i < shortestPath.length; i += pathBatchSize) {
         setTimeout(() => {
           setGrid((prevGrid) => {
@@ -447,15 +454,17 @@ export const usePathfinding = () => {
       }
     }
 
-    // Update metrics and end running state after animation completes
+    // Update metrics
     setTimeout(() => {
       setVisitedNodes(visitedCount);
-      setPathLength(pathLen);
-      setTotalCost(cost);
+      setPathLength(
+        shortestPath && shortestPath.length > 0 ? shortestPath.length - 1 : 0
+      );
+      setTotalCost(totalCost || 0);
       setIsRunning(false);
       setIsTimerRunning(false);
       setHasPathfindingResult(true);
-    }, (endNodeFound ? visitedSleep * (endNodeBatchIndex + 1) : visitedSleep * Math.ceil(filteredVisitedNodes.length / visitedBatchSize)) + pathSleep * Math.ceil(shortestPath.length / pathBatchSize));
+    }, (endNodeFound ? visitedSleep * (endNodeBatchIndex + 1) : visitedSleep * Math.ceil(filteredVisitedNodes.length / visitedBatchSize)) + pathSleep * Math.ceil((shortestPath && Array.isArray(shortestPath) ? shortestPath.length : 0) / pathBatchSize));
   };
 
   // Generate maze

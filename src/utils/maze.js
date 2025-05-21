@@ -84,10 +84,6 @@ export const generateWeightRandomScatter = async (grid, setGrid, bfs) => {
     newGrid[15][40]
   );
   if (!visitedNodesInOrder.some((node) => node.isEnd)) {
-    // Fall back to wall-based random scatter (matching generateRandomScatter)
-    console.log(
-      `Weight scatter maze not solvable, falling back to random scatter`
-    );
     newGrid = newGrid.map((row, rowIndex) =>
       row.map((node, colIndex) => {
         const isInner =
@@ -352,7 +348,6 @@ export const generateMaze = async (skew, grid, setGrid, bfs) => {
     newGrid[15][40]
   );
   if (!visitedNodesInOrder.some((node) => node.isEnd)) {
-    console.log(`Maze not solvable, falling back to random scatter`);
     newGrid = newGrid.map((row, rowIndex) =>
       row.map((node, colIndex) => ({
         ...node,

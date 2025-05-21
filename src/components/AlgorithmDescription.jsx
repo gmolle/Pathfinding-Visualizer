@@ -33,24 +33,31 @@ export default function AlgorithmDescription({
       weighted: false,
       guaranteedShortest: false,
     },
+    bidirectionalBFS: {
+      name: "Bidirectional BFS",
+      weighted: false,
+      guaranteedShortest: true,
+    },
   };
 
   const algo = algorithms[algorithm] || null;
+
+  const getArticle = (isWeighted) => (isWeighted ? "a" : "an");
 
   return (
     <div className="text-center px-4 text-gray-700">
       <p className="mb-2">
         {algo ? (
           <>
-            {algo.name} is a{" "}
+            {algo.name} is {getArticle(algo.weighted)}{" "}
             <span className="font-bold italic">
               {algo.weighted ? "weighted" : "unweighted"}
             </span>{" "}
-            algorithm and it{" "}
+            algorithm and{" "}
             <span className="font-bold italic">
               {algo.guaranteedShortest ? "guarantees" : "does not guarantee"}
             </span>{" "}
-            the shortest path
+            the shortest path.
           </>
         ) : (
           "Select an algorithm to see its description."
