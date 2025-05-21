@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { runAlgorithm, bfs } from "../utils/algorithms";
+import {
+  runAlgorithm,
+  runAlgorithmNoAnimation,
+  bfs,
+} from "../utils/algorithms";
 import {
   generateMaze,
   generateRandomScatter,
@@ -51,6 +55,7 @@ export const usePathfinding = () => {
   const [visitedNodes, setVisitedNodes] = useState(0);
   const [pathLength, setPathLength] = useState(0);
   const [totalCost, setTotalCost] = useState(0);
+  const [hasPathfindingResult, setHasPathfindingResult] = useState(false); // Track if pathfinding has run
 
   // Timer logic
   useEffect(() => {
@@ -73,6 +78,7 @@ export const usePathfinding = () => {
     setVisitedNodes(0);
     setPathLength(0);
     setTotalCost(0);
+    setHasPathfindingResult(false);
   };
 
   // Toggle weight mode
@@ -138,7 +144,24 @@ export const usePathfinding = () => {
       node.isStart = true;
       node.weight = 1;
       node.isWall = false;
-      setGrid(newGrid);
+      if (hasPathfindingResult) {
+        const startNode = newGrid[row][col];
+        const endNode = newGrid.flat().find((n) => n.isEnd);
+        if (startNode && endNode) {
+          const {
+            visitedNodesInOrder,
+            newGrid: updatedGrid,
+            shortestPath,
+            totalCost,
+          } = runAlgorithmNoAnimation(algorithm, newGrid, startNode, endNode);
+          setGrid(updatedGrid);
+          setVisitedNodes(visitedNodesInOrder.filter((n) => !n.isStart).length);
+          setPathLength(shortestPath.length > 0 ? shortestPath.length - 1 : 0);
+          setTotalCost(totalCost);
+        }
+      } else {
+        setGrid(newGrid);
+      }
     } else if (
       dragging === "end" &&
       !node.isWall &&
@@ -149,7 +172,24 @@ export const usePathfinding = () => {
       node.isEnd = true;
       node.weight = 1;
       node.isWall = false;
-      setGrid(newGrid);
+      if (hasPathfindingResult) {
+        const startNode = newGrid.flat().find((n) => n.isStart);
+        const endNode = newGrid[row][col];
+        if (startNode && endNode) {
+          const {
+            visitedNodesInOrder,
+            newGrid: updatedGrid,
+            shortestPath,
+            totalCost,
+          } = runAlgorithmNoAnimation(algorithm, newGrid, startNode, endNode);
+          setGrid(updatedGrid);
+          setVisitedNodes(visitedNodesInOrder.filter((n) => !n.isStart).length);
+          setPathLength(shortestPath.length > 0 ? shortestPath.length - 1 : 0);
+          setTotalCost(totalCost);
+        }
+      } else {
+        setGrid(newGrid);
+      }
     } else if (mode === "eraser" && !node.isStart && !node.isEnd) {
       node.isWall = false;
       node.weight = 1;
@@ -352,6 +392,7 @@ export const usePathfinding = () => {
       setTotalCost(cost);
       setIsRunning(false);
       setIsTimerRunning(false);
+      setHasPathfindingResult(true);
     }, (endNodeFound ? visitedSleep * (endNodeBatchIndex + 1) : visitedSleep * Math.ceil(filteredVisitedNodes.length / visitedBatchSize)) + pathSleep * Math.ceil(shortestPath.length / pathBatchSize));
   };
 
@@ -364,6 +405,7 @@ export const usePathfinding = () => {
     setVisitedNodes(0);
     setPathLength(0);
     setTotalCost(0);
+    setHasPathfindingResult(false);
     if (mazeType === "random-scatter") {
       await generateRandomScatter(grid, setGrid, bfs);
     } else if (mazeType === "weight-random-scatter") {

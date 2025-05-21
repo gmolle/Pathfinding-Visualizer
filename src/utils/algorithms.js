@@ -1,3 +1,5 @@
+// ../utils/algorithms.js
+
 // Heuristic for A* and Greedy Best-First
 const heuristic = (node1, node2) =>
   Math.abs(node1.row - node2.row) + Math.abs(node1.col - node2.col);
@@ -204,4 +206,78 @@ export const runAlgorithm = (algorithm, grid, startNode, endNode) => {
     default:
       return { visitedNodesInOrder: [], newGrid: grid };
   }
+};
+
+export const runAlgorithmNoAnimation = (
+  algorithm,
+  grid,
+  startNode,
+  endNode
+) => {
+  // Create a deep copy of the grid, preserving walls and weights
+  const newGrid = grid.map((row) =>
+    row.map((node) => ({
+      ...node,
+      isVisited: false,
+      isPath: false,
+      isCurrent: false,
+      distance: Infinity,
+      fScore: Infinity,
+      hScore: Infinity,
+      previousNode: null,
+    }))
+  );
+
+  // Ensure start and end nodes are correctly set
+  newGrid[startNode.row][startNode.col].isStart = true;
+  newGrid[startNode.row][startNode.col].distance = 0;
+  newGrid[startNode.row][startNode.col].fScore =
+    algorithm === "astar" ? heuristic(startNode, endNode) : 0;
+  newGrid[startNode.row][startNode.col].hScore =
+    algorithm === "greedy" ? heuristic(startNode, endNode) : Infinity;
+  newGrid[endNode.row][endNode.col].isEnd = true;
+
+  // Run the algorithm
+  const { visitedNodesInOrder, newGrid: computedGrid } = runAlgorithm(
+    algorithm,
+    newGrid,
+    newGrid[startNode.row][startNode.col],
+    newGrid[endNode.row][endNode.col]
+  );
+
+  // Trace the shortest path and calculate total cost
+  const shortestPath = [];
+  let currentNode = computedGrid[endNode.row][endNode.col];
+  let totalCost = 0;
+  while (currentNode && currentNode.previousNode) {
+    shortestPath.push(currentNode);
+    totalCost += currentNode.weight;
+    currentNode = currentNode.previousNode;
+  }
+  if (currentNode && currentNode.isStart) {
+    shortestPath.push(currentNode);
+    totalCost += currentNode.weight;
+  }
+  shortestPath.reverse();
+
+  // Update grid with visited and path nodes
+  visitedNodesInOrder.forEach((node) => {
+    if (!node.isStart && !node.isEnd) {
+      computedGrid[node.row][node.col].isVisited = true;
+      computedGrid[node.row][node.col].animationKey += 1;
+    }
+  });
+  shortestPath.forEach((node) => {
+    if (!node.isStart && !node.isEnd) {
+      computedGrid[node.row][node.col].isPath = true;
+      computedGrid[node.row][node.col].animationKey += 1;
+    }
+  });
+
+  return {
+    visitedNodesInOrder,
+    newGrid: computedGrid,
+    shortestPath,
+    totalCost,
+  };
 };
