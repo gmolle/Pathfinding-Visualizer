@@ -1,7 +1,54 @@
-// src/utils/algorithms.js
-// Heuristic for A*
+// Heuristic for A* and Greedy Best-First
 const heuristic = (node1, node2) =>
   Math.abs(node1.row - node2.row) + Math.abs(node1.col - node2.col);
+
+// Greedy Best-First Search (Weighted, but heuristic-driven)
+const greedyBestFirst = (grid, startNode, endNode) => {
+  const newGrid = grid.map((row) =>
+    row.map((node) => ({
+      ...node,
+      hScore: Infinity, // Heuristic score
+      isVisited: false,
+      isPath: false,
+      previousNode: null,
+    }))
+  );
+  const visitedNodesInOrder = [];
+  startNode = newGrid[startNode.row][startNode.col];
+  endNode = newGrid[endNode.row][endNode.col];
+  startNode.hScore = heuristic(startNode, endNode);
+
+  const unvisited = [];
+  newGrid.forEach((row) => row.forEach((node) => unvisited.push(node)));
+
+  while (unvisited.length) {
+    unvisited.sort((a, b) => a.hScore - b.hScore);
+    const closestNode = unvisited.shift();
+    if (closestNode.isWall || closestNode.isVisited) continue;
+    if (closestNode.hScore === Infinity) break;
+
+    closestNode.isVisited = true;
+    visitedNodesInOrder.push(closestNode);
+
+    if (closestNode === endNode) break;
+
+    const { row, col } = closestNode;
+    const neighbors = [];
+    if (row > 0) neighbors.push(newGrid[row - 1][col]);
+    if (row < grid.length - 1) neighbors.push(newGrid[row + 1][col]);
+    if (col > 0) neighbors.push(newGrid[row][col - 1]);
+    if (col < grid[0].length - 1) neighbors.push(newGrid[row][col + 1]);
+
+    for (const neighbor of neighbors) {
+      if (!neighbor.isVisited && !neighbor.isWall) {
+        neighbor.hScore = heuristic(neighbor, endNode);
+        neighbor.previousNode = closestNode;
+        // No distance calculation; GBFS relies solely on heuristic
+      }
+    }
+  }
+  return { visitedNodesInOrder, newGrid };
+};
 
 // Dijkstra's Algorithm (Weighted)
 const dijkstra = (grid, startNode, endNode) => {
@@ -152,6 +199,8 @@ export const runAlgorithm = (algorithm, grid, startNode, endNode) => {
       return aStar(grid, startNode, endNode);
     case "bfs":
       return bfs(grid, startNode, endNode);
+    case "greedy":
+      return greedyBestFirst(grid, startNode, endNode);
     default:
       return { visitedNodesInOrder: [], newGrid: grid };
   }

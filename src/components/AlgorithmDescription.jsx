@@ -23,6 +23,11 @@ export default function AlgorithmDescription({
       weighted: false,
       guaranteedShortest: true,
     },
+    greedy: {
+      name: "Greedy Best-First Search",
+      weighted: true,
+      guaranteedShortest: false,
+    },
   };
 
   const algo = algorithms[algorithm] || null;

@@ -1,6 +1,7 @@
+import { memo } from "react";
 import { Weight } from "lucide-react";
 
-export default function Controls({
+function Controls({
   algorithm,
   mode,
   mazeType,
@@ -18,10 +19,18 @@ export default function Controls({
   const handleAlgorithmChange = (e) => {
     if (isRunning) return;
     const newAlgorithm = e.target.value;
-    if (newAlgorithm === "bfs" && mode === "weight") {
+    if (
+      (newAlgorithm === "bfs" || newAlgorithm === "greedy") &&
+      mode === "weight"
+    ) {
       toggleWeightMode();
     }
     setAlgorithm(newAlgorithm);
+  };
+
+  const handleMazeTypeChange = (e) => {
+    if (isRunning) return;
+    setMazeType(e.target.value);
   };
 
   return (
@@ -33,7 +42,7 @@ export default function Controls({
             : "hover:text-sky-400 cursor-pointer"
         }`}
         value={algorithm}
-        onChange={(e) => handleAlgorithmChange(e)}
+        onChange={handleAlgorithmChange}
         disabled={isRunning}
       >
         <option value="dijkstra" className="bg-gray-700 text-white">
@@ -44,6 +53,9 @@ export default function Controls({
         </option>
         <option value="bfs" className="bg-gray-700 text-white">
           BFS
+        </option>
+        <option value="greedy" className="bg-gray-700 text-white">
+          Greedy Best-First
         </option>
       </select>
       <button
@@ -90,14 +102,14 @@ export default function Controls({
             : "hover:text-sky-400 cursor-pointer"
         }`}
         value={mazeType}
-        onChange={(e) => !isRunning && setMazeType(e.target.value)}
+        onChange={handleMazeTypeChange}
         disabled={isRunning}
       >
         <option value="" className="bg-gray-700 text-white">
           Select Pattern
         </option>
         <option value="none" className="bg-gray-700 text-white">
-          Recursive Divison
+          Recursive Division
         </option>
         <option value="horizontal" className="bg-gray-700 text-white">
           Horizontal Skew
@@ -124,14 +136,14 @@ export default function Controls({
       </button>
       <button
         className={`flex items-center gap-1 px-3 py-1 text-sm font-semibold transition-colors flex-shrink-0 ${
-          isRunning || algorithm === "bfs"
+          isRunning || algorithm === "bfs" || algorithm === "greedy"
             ? "opacity-50 cursor-not-allowed text-white"
             : mode === "weight"
             ? "text-sky-400 hover:text-sky-600 cursor-pointer"
             : "text-white hover:text-sky-400 cursor-pointer"
         }`}
         onClick={toggleWeightMode}
-        disabled={isRunning || algorithm === "bfs"}
+        disabled={isRunning || algorithm === "bfs" || algorithm === "greedy"}
       >
         {mode === "weight" ? "Weight Mode: ON" : "Weight Mode: OFF"}
         <Weight size={16} />
@@ -163,3 +175,5 @@ export default function Controls({
     </div>
   );
 }
+
+export default memo(Controls);
