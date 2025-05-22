@@ -71,29 +71,38 @@ export const bfs = (grid, startNode, endNode) => {
       if (!visited.has(key)) {
         visited.add(key);
         queue.push(neighbor);
-        neighbor.isVisited = true; // Set on workingGrid copy
+        neighbor.isVisited = true;
         neighbor.previousNode = currentNode;
         visitedNodesInOrder.push(neighbor);
       }
     }
   }
 
-  // Return a new grid copy for consistency
-  const newGrid = grid.map((row) => row.map((node) => ({ ...node })));
+  // Reconstruct the shortest path
   const shortestPath = [];
   let totalCost = 0;
-  let currentNode = newGrid[endNode.row][endNode.col];
-  while (currentNode && currentNode.previousNode) {
-    shortestPath.push(currentNode);
-    totalCost += currentNode.weight;
-    currentNode = currentNode.previousNode;
+  let currentNode = workingGrid[endNode.row][endNode.col];
+  if (!currentNode.previousNode && currentNode !== localStartNode) {
+    // End node was not reached
+    return {
+      visitedNodesInOrder,
+      newGrid: grid.map((row) => row.map((node) => ({ ...node }))),
+      shortestPath: [],
+      totalCost: 0,
+    };
   }
-  if (currentNode && currentNode.isStart) {
+
+  while (currentNode) {
     shortestPath.push(currentNode);
-    totalCost += currentNode.weight;
+    totalCost += currentNode.weight || 1; // Default weight to 1 if not specified
+    currentNode = currentNode.previousNode;
   }
   shortestPath.reverse();
 
+  // Create a new grid for output and mark the path
+  const newGrid = grid.map((row) =>
+    row.map((node) => ({ ...node, isPath: false }))
+  );
   shortestPath.forEach((node) => {
     if (!node.isStart && !node.isEnd) {
       newGrid[node.row][node.col].isPath = true;
@@ -356,6 +365,16 @@ export const greedyBestFirst = (grid, startNode, endNode) => {
 
 // DFS
 export const dfs = (grid, startNode, endNode) => {
+  if (!startNode || !endNode || !grid || !grid.length || !grid[0].length) {
+    return {
+      visitedNodesInOrder: [],
+      newGrid: grid,
+      shortestPath: [],
+      totalCost: 0,
+    };
+  }
+
+  // Create a deep copy of the grid
   const newGrid = grid.map((row) =>
     row.map((node) => ({
       ...node,
@@ -381,6 +400,7 @@ export const dfs = (grid, startNode, endNode) => {
     const { row, col } = currentNode;
     const neighbors = [];
 
+    // Maintain original neighbor order: left, down, right, up
     if (col > 0) neighbors.push(newGrid[row][col - 1]);
     if (row < grid.length - 1) neighbors.push(newGrid[row + 1][col]);
     if (col < grid[0].length - 1) neighbors.push(newGrid[row][col + 1]);
@@ -394,7 +414,38 @@ export const dfs = (grid, startNode, endNode) => {
     }
   }
 
-  return { visitedNodesInOrder, newGrid };
+  // Reconstruct the shortest path
+  const shortestPath = [];
+  let totalCost = 0;
+  let currentNode = newGrid[endNode.row][endNode.col];
+  if (
+    !currentNode.previousNode &&
+    currentNode !== newGrid[startNode.row][startNode.col]
+  ) {
+    // End node was not reached
+    return {
+      visitedNodesInOrder,
+      newGrid,
+      shortestPath: [],
+      totalCost: 0,
+    };
+  }
+
+  while (currentNode) {
+    shortestPath.push(currentNode);
+    totalCost += currentNode.weight || 1; // Default weight to 1 if not specified
+    currentNode = currentNode.previousNode;
+  }
+  shortestPath.reverse();
+
+  // Mark the path on the grid
+  shortestPath.forEach((node) => {
+    if (!node.isStart && !node.isEnd) {
+      newGrid[node.row][node.col].isPath = true;
+    }
+  });
+
+  return { visitedNodesInOrder, newGrid, shortestPath, totalCost };
 };
 
 // A*
@@ -408,33 +459,55 @@ export const aStar = (grid, startNode, endNode) => {
     };
   }
 
+  // Create a deep copy of the grid for computations
+  const workingGrid = grid.map((row) =>
+    row.map((node) => ({
+      ...node,
+      gScore: Infinity,
+      fScore: Infinity,
+      isVisited: false,
+      previousNode: null,
+    }))
+  );
+  const localStartNode = workingGrid[startNode.row][startNode.col];
+  const localEndNode = workingGrid[endNode.row][endNode.col];
+
   const visitedNodesInOrder = [];
   const openSet = [];
-  startNode.gScore = 0;
-  startNode.fScore = heuristic(startNode, endNode);
-  openSet.push(startNode);
+  localStartNode.gScore = 0;
+  localStartNode.fScore = heuristic(localStartNode, endNode);
+  openSet.push(localStartNode);
   const visited = new Set();
+
+  // Create output grid
+  const newGrid = grid.map((row) =>
+    row.map((node) => ({ ...node, isPath: false, isVisited: false }))
+  );
 
   while (openSet.length > 0) {
     openSet.sort((a, b) => a.fScore - b.fScore);
     const currentNode = openSet.shift();
 
     if (currentNode.isWall) continue;
-    currentNode.isVisited = true;
-    visitedNodesInOrder.push(currentNode);
-    visited.add(`${currentNode.row}-${currentNode.col}`);
+    if (!currentNode.isVisited) {
+      currentNode.isVisited = true;
+      // Set isVisited on newGrid and add to visitedNodesInOrder
+      newGrid[currentNode.row][currentNode.col].isVisited = true;
+      visitedNodesInOrder.push(newGrid[currentNode.row][currentNode.col]);
+      visited.add(`${currentNode.row}-${currentNode.col}`);
+    }
 
-    if (currentNode === endNode) break;
+    if (currentNode === localEndNode) break;
 
-    const neighbors = getNeighbors(currentNode, grid);
+    const neighbors = getNeighbors(currentNode, workingGrid);
     for (const neighbor of neighbors) {
       const key = `${neighbor.row}-${neighbor.col}`;
       if (!visited.has(key)) {
-        const tentativeGScore = currentNode.gScore + neighbor.weight;
-        if (tentativeGScore < (neighbor.gScore || Infinity)) {
+        const tentativeGScore = currentNode.gScore + (neighbor.weight || 1);
+        if (tentativeGScore < neighbor.gScore) {
           neighbor.previousNode = currentNode;
           neighbor.gScore = tentativeGScore;
-          neighbor.fScore = tentativeGScore + heuristic(neighbor, endNode);
+          neighbor.fScore = tentativeGScore + heuristic(neighbor, localEndNode);
           if (!openSet.includes(neighbor)) {
             openSet.push(neighbor);
           }
@@ -443,18 +516,24 @@ export const aStar = (grid, startNode, endNode) => {
     }
   }
 
-  const newGrid = grid.map((row) => row.map((node) => ({ ...node })));
+  // Reconstruct path
   const shortestPath = [];
   let totalCost = 0;
-  let currentNode = newGrid[endNode.row][endNode.col];
-  while (currentNode && currentNode.previousNode) {
-    shortestPath.push(currentNode);
-    totalCost += currentNode.weight;
-    currentNode = currentNode.previousNode;
+  let currentNode = workingGrid[endNode.row][endNode.col];
+  if (!currentNode.previousNode && currentNode !== localStartNode) {
+    // End node not reached
+    return {
+      visitedNodesInOrder,
+      newGrid,
+      shortestPath: [],
+      totalCost: 0,
+    };
   }
-  if (currentNode && currentNode.isStart) {
-    shortestPath.push(currentNode);
-    totalCost += currentNode.weight;
+
+  while (currentNode) {
+    shortestPath.push(newGrid[currentNode.row][currentNode.col]);
+    totalCost += currentNode.weight || 1;
+    currentNode = currentNode.previousNode;
   }
   shortestPath.reverse();
 

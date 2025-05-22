@@ -27,7 +27,7 @@ export default function Node({
     : isWall
     ? "bg-gray-900"
     : isVisited
-    ? "bg-cyan-300"
+    ? "bg-blue-200"
     : weight === 2
     ? "bg-indigo-200"
     : "bg-white";

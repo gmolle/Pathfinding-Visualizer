@@ -28,7 +28,6 @@ export default function Legend() {
       <div className="flex items-center gap-2">
         <div className="flex gap-1">
           <div className="w-6 h-6 bg-blue-200"></div>
-          <div className="w-6 h-6 bg-purple-400"></div>
         </div>
         <span>Visited</span>
       </div>
