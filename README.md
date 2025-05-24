@@ -2,6 +2,8 @@
 
 An interactive React-based web app for visualizing popular pathfinding algorithms in real-time. Built to help users understand how algorithms explore and solve problems in grid environments.
 
+View the deployed project [here](https://gmolle.github.io/Pathfinding-Visualizer/)
+
 ![Pathfinding Visualizer Demo](public/pathfinding-visualizer.gif)
 
 ---
