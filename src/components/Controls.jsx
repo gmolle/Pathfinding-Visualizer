@@ -89,8 +89,8 @@ function Controls({
           <input
             id="speed"
             type="range"
-            min="5"
-            max="200"
+            min="20"
+            max="150"
             value={speed}
             onChange={(e) => !isRunning && setSpeed(Number(e.target.value))}
             className={`w-16 cursor-grab accent-sky-400 ${
